@@ -1,0 +1,10 @@
+dotenv
+electron
+electron-debug
+electron-devtools-installer
+electron-store
+electron-util
+electron-window-state
+fs-extra
+mime
+yargs

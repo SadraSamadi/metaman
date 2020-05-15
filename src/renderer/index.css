@@ -1,0 +1,19 @@
+@import "~antd/dist/antd.css";
+@import "~tailwindcss/components.css";
+@import "~tailwindcss/utilities.css";
+
+::-webkit-scrollbar {
+  @apply w-1 h-1;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-400;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-500;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-600;
+}

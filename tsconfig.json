@@ -1,0 +1,9 @@
+{
+  "extends": "./node_modules/electron-app-scripts/config/tsconfig.json",
+  "files": [
+    "./node_modules/electron-app-scripts/config/type.d.ts"
+  ],
+  "include": [
+    "src"
+  ]
+}
