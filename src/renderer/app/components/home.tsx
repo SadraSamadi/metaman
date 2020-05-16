@@ -4,7 +4,6 @@ import actions from '../actions';
 import {AppDispatch} from '../models/store';
 import Header from './header';
 import Main from './main';
-import Prefs from './prefs';
 import WrapperList from './wrapper-list';
 
 export default function Home(): ReactElement {
@@ -30,7 +29,6 @@ export default function Home(): ReactElement {
           <Main/>
         </div>
       </div>
-      <Prefs/>
     </div>
   );
 

@@ -4,7 +4,7 @@ import actions from '../actions';
 import {Movie} from '../models/movie';
 import {Entity, EntityAction, Normalized} from '../models/store';
 
-const initialState: Entity<Movie> = {};
+const initialState: Entity<Movie, number> = {};
 
 export default createReducer(initialState, {
   [actions.wrappers.request.type]: () => initialState,

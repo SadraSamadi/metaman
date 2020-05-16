@@ -28,7 +28,7 @@ function* handle(payload: EntityPayload<number>): SagaIterator {
       data: normalized
     }));
   } catch (err) {
-    yield put(actions.movies.failure(payload.id as string, err));
+    yield put(actions.movies.failure(payload.id, err));
   }
 }
 

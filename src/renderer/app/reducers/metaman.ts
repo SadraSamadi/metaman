@@ -17,7 +17,7 @@ export default createReducer(initialState, {
   [actions.wrappers.add.type]: (state, action: NormalizedAction<string>) => {
     state.wrappers.data.push(action.payload.result);
   },
-  [actions.wrappers.cancel.type]: (state) => {
+  [actions.wrappers.cancel.type]: state => {
     state.wrappers.status = 'cancel';
   },
   [actions.wrappers.success.type]: state => {

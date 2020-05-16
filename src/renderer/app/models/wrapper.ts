@@ -13,7 +13,7 @@ export interface Wrapper {
 
   guess: AsyncState<Lazy<Guess>>;
 
-  movie: AsyncState<Lazy<Movie>>;
+  movie: AsyncState<Lazy<Movie, number>>;
 
   meta: AsyncState<Lazy<Metadata>>;
 

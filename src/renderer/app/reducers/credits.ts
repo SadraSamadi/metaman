@@ -4,7 +4,7 @@ import actions from '../actions';
 import {Credit} from '../models/credit';
 import {Entity, EntityAction, Normalized} from '../models/store';
 
-const initialState: Entity<Credit> = {};
+const initialState: Entity<Credit, number> = {};
 
 export default createReducer(initialState, {
   [actions.wrappers.request.type]: () => initialState,

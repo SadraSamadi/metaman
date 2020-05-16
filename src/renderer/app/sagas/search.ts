@@ -24,7 +24,7 @@ function* watch(): SagaIterator {
 
 function* handle(payload: EntityPayload<number>): SagaIterator {
   try {
-    let wrapper: Wrapper = yield select(selectors.wrappers.wrapper(payload.id as string));
+    let wrapper: Wrapper = yield select(selectors.wrappers.wrapper(payload.id));
     let {title, year} = wrapper.info;
     let page: Page = yield call(searchMovie, title, year, payload.data);
     yield put(actions.search.success(page));

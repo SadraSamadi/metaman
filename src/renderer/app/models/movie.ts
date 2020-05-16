@@ -12,15 +12,15 @@ export interface Movie {
 
   backdrop_path: string;
 
-  belongs_to_collection: Lazy<Collection>;
+  belongs_to_collection: Lazy<Collection, number>;
 
   budget: number;
 
-  credits: Lazy<Credit>;
+  credits: Lazy<Credit, number>;
 
   genre_ids: Array<number>;
 
-  genres: Array<Lazy<Genre>>;
+  genres: Array<Lazy<Genre, number>>;
 
   homepage: string;
 
@@ -38,7 +38,7 @@ export interface Movie {
 
   poster_path: string;
 
-  production_companies: Array<Lazy<Company>>;
+  production_companies: Array<Lazy<Company, number>>;
 
   production_countries: Array<Lazy<Country>>;
 

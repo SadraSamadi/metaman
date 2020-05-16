@@ -4,7 +4,7 @@ import actions from '../actions';
 import {Genre} from '../models/genre';
 import {Entity, EntityAction, Normalized} from '../models/store';
 
-const initialState: Entity<Genre> = {};
+const initialState: Entity<Genre, number> = {};
 
 export default createReducer(initialState, {
   [actions.wrappers.request.type]: () => initialState,

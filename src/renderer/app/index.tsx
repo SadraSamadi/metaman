@@ -10,7 +10,7 @@ export default function App(): ReactElement {
   return (
     <Provider store={store}>
       <HashRouter>
-        <div className='w-screen h-screen bg-gray-100 overflow-hidden select-none'>
+        <div className='w-screen h-screen overflow-hidden select-none'>
           <Switch>
             <Redirect exact from='/' to='/home'/>
             <Route path='/home' component={Home}/>

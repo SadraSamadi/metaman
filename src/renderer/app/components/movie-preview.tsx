@@ -18,7 +18,7 @@ export default function MoviePreview(props: RouteComponentProps): ReactElement {
   }, []);
 
   return data ? (
-    <div className='whitespace-pre-wrap overflow-auto'>{data}</div>
+    <div className='whitespace-pre-wrap overflow-y-auto'>{data}</div>
   ) : (
     <div className='h-full flex items-center justify-center'>
       <Spin size='large'/>

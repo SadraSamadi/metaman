@@ -5,6 +5,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import actions from '../actions';
 import {AppDispatch} from '../models/store';
 import selectors from '../selectors';
+import Prefs from './prefs';
 
 export default function Header(): ReactElement {
 
@@ -51,6 +52,7 @@ export default function Header(): ReactElement {
               onClick={onPrefs}>
         Preferences
       </Button>
+      <Prefs/>
     </div>
   );
 

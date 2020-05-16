@@ -16,6 +16,6 @@ export interface Company {
 
   origin_country: string;
 
-  parent_company: Lazy<Company>;
+  parent_company: Lazy<Company, number>;
 
 }

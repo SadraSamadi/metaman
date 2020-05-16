@@ -18,25 +18,25 @@ export type AppState = ReturnType<typeof store.getState>;
 
 export type AppDispatch = typeof store.dispatch;
 
-export type NormalizedAction<T> = PayloadAction<Normalized<T>>;
+export type NormalizedAction<R> = PayloadAction<Normalized<R>>;
 
-export type Normalized<T> = NormalizedSchema<Entities, T>;
+export type Normalized<R> = NormalizedSchema<Entities, R>;
 
 export interface Entities {
 
   casts: Entity<Cast>;
 
-  collections: Entity<Collection>;
+  collections: Entity<Collection, number>;
 
-  companies: Entity<Company>;
+  companies: Entity<Company, number>;
 
   countries: Entity<Country>;
 
-  credits: Entity<Credit>;
+  credits: Entity<Credit, number>;
 
   crews: Entity<Crew>;
 
-  genres: Entity<Genre>;
+  genres: Entity<Genre, number>;
 
   guesses: Entity<Guess>;
 
@@ -44,19 +44,19 @@ export interface Entities {
 
   metadata: Entity<Metadata>;
 
-  movies: Entity<Movie>;
+  movies: Entity<Movie, number>;
 
   wrappers: Entity<Wrapper>;
 
 }
 
-export type Lazy<T> = Identifier | T;
+export type Lazy<T, I extends Identifier = string> = I | T;
 
-export type Entity<T> = { [i in Identifier]: T; };
+export type Entity<T, I extends Identifier = string> = { [i in I]: T; };
 
-export type EntityAction<T> = PayloadAction<EntityPayload<T>>;
+export type EntityAction<T, I extends Identifier = string> = PayloadAction<EntityPayload<T, I>>;
 
-export type EntityPayload<T> = { id: Identifier; data: T; };
+export type EntityPayload<T, I extends Identifier = string> = { id: I; data: T; };
 
 export type Identifier = string | number;
 
