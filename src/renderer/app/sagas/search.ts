@@ -3,7 +3,6 @@ import {SagaIterator} from 'redux-saga';
 import {call, fork, put, race, select, take} from 'redux-saga/effects';
 import actions from '../actions';
 import {searchMovie} from '../apis/tmdb';
-import {Guess} from '../models/guessit';
 import {Page} from '../models/page';
 import {EntityPayload} from '../models/store';
 import {Wrapper} from '../models/wrapper';
@@ -26,8 +25,8 @@ function* watch(): SagaIterator {
 function* handle(payload: EntityPayload<number>): SagaIterator {
   try {
     let wrapper: Wrapper = yield select(selectors.wrappers.wrapper(payload.id as string));
-    let guess: Guess = yield select(selectors.guesses.guess(wrapper.guess.data as string));
-    let page: Page = yield call(searchMovie, guess.title, guess.year, payload.data);
+    let {title, year} = wrapper.info;
+    let page: Page = yield call(searchMovie, title, year, payload.data);
     yield put(actions.search.success(page));
   } catch (err) {
     yield put(actions.search.failure(err));

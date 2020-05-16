@@ -10,13 +10,12 @@ export default function MovieDetails(props: MovieDetailsProps): ReactElement {
 
   return (
     <div>
-      <ImageContainer path={movie.backdrop_path} size='w780' className='p-4 flex' tint={0.5}>
-        <Image path={movie.poster_path} size='w342' className='rounded shadow'
-               />
-        <div className='ml-4'>
+      <ImageContainer path={movie.backdrop_path} size='w780' className='p-4 flex' tint={0.25}>
+        <Image path={movie.poster_path} size='w342' className='rounded shadow'/>
+        <div className='ml-4 text-white'>
           <h1 className='text-white'>{movie.title}</h1>
           <h3 className='text-white'>{movie.release_date}</h3>
-          <p className='text-justify text-white'>{movie.overview}</p>
+          <p className='text-justify'>{movie.overview}</p>
           <div className='flex flex-wrap'>
             {movie.genres.map((genre: number) => (
               <GenreTag key={genre} id={genre}/>

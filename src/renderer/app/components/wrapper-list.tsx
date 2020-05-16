@@ -2,7 +2,7 @@ import {Empty} from 'antd';
 import React, {ReactElement} from 'react';
 import {useSelector} from 'react-redux';
 import selectors from '../selectors';
-import {WrapperItem} from './wrapper-item';
+import WrapperItem from './wrapper-item';
 
 export default function WrapperList(): ReactElement {
 
@@ -10,8 +10,8 @@ export default function WrapperList(): ReactElement {
 
   return data?.length ? (
     <div className='max-h-full overflow-y-auto'>
-      {data.map((id: string) => (
-        <WrapperItem key={id} id={id}/>)
+      {data.map((wrapper: string) => (
+        <WrapperItem key={wrapper} id={wrapper}/>)
       )}
     </div>
   ) : (

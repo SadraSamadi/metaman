@@ -12,6 +12,7 @@ export default createReducer(initialState, {
     state.wrappers.status = 'request';
     state.wrappers.data = [];
     state.wrappers.error = null;
+    state.selected = null;
   },
   [actions.wrappers.add.type]: (state, action: NormalizedAction<string>) => {
     state.wrappers.data.push(action.payload.result);

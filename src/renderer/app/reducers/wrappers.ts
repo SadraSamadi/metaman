@@ -4,7 +4,7 @@ import actions from '../actions';
 import {Guess} from '../models/guessit';
 import {Metadata} from '../models/metadata';
 import {Entity, EntityAction, FailureAction, Normalized, NormalizedAction} from '../models/store';
-import {Wrapper} from '../models/wrapper';
+import {Info, Wrapper} from '../models/wrapper';
 
 const initialState: Entity<Wrapper> = {};
 
@@ -12,6 +12,13 @@ export default createReducer(initialState, {
   [actions.wrappers.request.type]: () => initialState,
   [actions.wrappers.add.type]: (state, action: NormalizedAction<string>) => {
     _.assign(state, action.payload.entities.wrappers);
+  },
+  [actions.wrappers.info.type]: (state, action: EntityAction<Partial<Info>>) => {
+    let {id, data} = action.payload;
+    let wrapper = state[id];
+    _.merge(wrapper, {
+      info: data
+    });
   },
   [actions.guesses.request.type]: (state, action: PayloadAction<string>) => {
     let {guess} = state[action.payload];
@@ -24,9 +31,17 @@ export default createReducer(initialState, {
   },
   [actions.guesses.success.type]: (state, action: EntityAction<Guess>) => {
     let {id, data} = action.payload;
-    let {guess} = state[id];
-    guess.status = 'success';
-    guess.data = data.id;
+    let wrapper = state[id];
+    _.merge(wrapper, {
+      info: {
+        title: data.title,
+        year: data.year
+      },
+      guess: {
+        status: 'success',
+        data: data.id
+      }
+    });
   },
   [actions.guesses.failure.type]: (state, action: FailureAction<string>) => {
     let {guess} = state[action.payload];

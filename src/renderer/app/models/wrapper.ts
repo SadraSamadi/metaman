@@ -9,10 +9,20 @@ export interface Wrapper {
 
   path: string;
 
+  info?: Info;
+
   guess: AsyncState<Lazy<Guess>>;
 
   movie: AsyncState<Lazy<Movie>>;
 
   meta: AsyncState<Lazy<Metadata>>;
+
+}
+
+export interface Info {
+
+  title: string;
+
+  year: number;
 
 }

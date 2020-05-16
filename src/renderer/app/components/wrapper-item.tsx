@@ -16,40 +16,33 @@ import actions from '../actions';
 import {AppDispatch} from '../models/store';
 import selectors from '../selectors';
 
-export function WrapperItem(props: WrapperItemProps): ReactElement {
+export default function WrapperItem(props: WrapperItemProps): ReactElement {
 
   const dispatch = useDispatch<AppDispatch>();
+  const selected = useSelector(selectors.metaman.selected);
   const wrapper = useSelector(selectors.wrappers.wrapper(props.id));
-  const guess = useSelector(selectors.guesses.guess(wrapper.guess.data as string));
   const movie = useSelector(selectors.movies.movie(wrapper.movie.data as number));
   const meta = useSelector(selectors.metadata.metadata(wrapper.meta.data as string));
-  const selected = useSelector(selectors.metaman.selected);
   const search = useSelector(selectors.search.search);
   const [name, setName] = useState<string>();
   const [update, setUpdate] = useState<string>();
+  const page = search.wrapper === props.id && search.page;
 
   useEffect(() => {
     if (movie) {
-      let year = moment(movie.release_date)
-        .year();
+      let year = moment(movie.release_date).year();
       setName(`${movie.title} (${year})`);
-    } else if (guess) {
-      setName(`${guess.title} (${guess.year})`);
+    } else if (wrapper.info) {
+      let {title, year} = wrapper.info;
+      setName(`${title} (${year})`);
     } else {
       let parsed = parse(wrapper.path);
       setName(parsed.name);
     }
-  }, [guess, movie]);
+  }, [wrapper.info, movie]);
 
   useEffect(() => {
-    if (meta) {
-      let now = Date.now();
-      let dur = moment.duration(meta.update - now)
-        .humanize(true);
-      setUpdate(dur);
-    } else {
-      setUpdate('NEVER');
-    }
+    setUpdate(meta ? moment(meta.update).fromNow() : 'NEVER');
   }, [meta]);
 
   function onSelect(): void {
@@ -59,41 +52,38 @@ export function WrapperItem(props: WrapperItemProps): ReactElement {
   return (
     <div onClick={onSelect}
          className={classNames(
-           'hover:bg-gray-100 cursor-pointer',
+           'hover:bg-gray-200 cursor-pointer',
            'transition-colors duration-75 ease-out',
-           {'bg-gray-100': props.id === selected}
+           {'bg-gray-200': props.id === selected}
          )}>
       <div className='p-2'>
-        <h5 className={classNames('m-0 truncate', {'font-bold': props.id === selected})}>{name}</h5>
+        <h5 className='m-0 truncate'>{name}</h5>
         <div className='flex items-center justify-between'>
-          <div className='text-xs text-gray-400'>
+          <div className='mr-2 text-xs text-gray-500'>
             <span className='font-bold'>last update: </span>
             <span>{update}</span>
           </div>
-          <div>
-            {(() => {
-              let request = _.includes([
-                wrapper.guess.status,
-                wrapper.movie.status,
-                wrapper.meta.status
-              ], 'request');
-              if (request || search.wrapper === props.id && search.page.status === 'request')
-                return <LoadingOutlined className='ml-2 text-purple-500'/>;
-              else if (wrapper.meta.data)
-                return <CheckOutlined className='ml-2 text-green-500'/>;
-              else if (wrapper.movie.data)
-                return <IssuesCloseOutlined className='ml-2 text-blue-500'/>;
-              else if (search.wrapper === props.id && search.page.data)
-                return <ClockCircleOutlined className='ml-2 text-yellow-500'/>;
-              else if (wrapper.guess.data)
-                return <ExclamationCircleOutlined className='ml-2 text-orange-500'/>;
-              else
-                return <WarningOutlined className='ml-2 text-red-500'/>;
-            })()}
-          </div>
+          {(() => {
+            let request = _.includes([
+              wrapper.guess.status,
+              wrapper.movie.status,
+              wrapper.meta.status,
+              page?.status
+            ], 'request');
+            if (request)
+              return <LoadingOutlined className='text-purple-500'/>;
+            else if (wrapper.meta.data)
+              return <CheckOutlined className='text-green-500'/>;
+            else if (wrapper.movie.data)
+              return <IssuesCloseOutlined className='text-blue-500'/>;
+            else if (page?.data?.results?.length)
+              return <ClockCircleOutlined className='text-yellow-500'/>;
+            else if (wrapper.info)
+              return <ExclamationCircleOutlined className='text-orange-500'/>;
+            return <WarningOutlined className='text-red-500'/>;
+          })()}
         </div>
       </div>
-      <div className='h-px bg-gray-200'/>
     </div>
   );
 

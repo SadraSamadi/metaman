@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import {app, BrowserWindow} from 'electron';
+import {app, BrowserWindow, Menu} from 'electron';
 import {is} from 'electron-util';
 import windowStateKeeper from 'electron-window-state';
 import _ from 'lodash';
@@ -8,10 +8,6 @@ import url from 'url';
 import yargs from 'yargs';
 
 (async () => {
-  if (is.development) {
-    const {default: debug} = await import('electron-debug');
-    await debug();
-  }
   await app.whenReady();
   if (is.development) {
     const {
@@ -23,16 +19,20 @@ import yargs from 'yargs';
       REACT_DEVELOPER_TOOLS,
       REDUX_DEVTOOLS
     ]);
+  } else {
+    Menu.setApplicationMenu(null);
   }
   let state = windowStateKeeper({
     defaultWidth: 800,
-    defaultHeight: 600
+    defaultHeight: 600,
+    maximize: true
   });
   let win = new BrowserWindow({
     x: state.x,
     y: state.y,
     width: state.width,
     height: state.height,
+    fullscreen: state.isFullScreen,
     webPreferences: {
       nodeIntegration: true
     }

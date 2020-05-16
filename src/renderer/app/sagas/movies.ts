@@ -1,6 +1,7 @@
+import {PayloadAction} from '@reduxjs/toolkit';
 import {normalize} from 'normalizr';
 import {SagaIterator} from 'redux-saga';
-import {call, fork, put, race, take} from 'redux-saga/effects';
+import {call, put, race, take, takeEvery} from 'redux-saga/effects';
 import actions from '../actions';
 import {getMovie} from '../apis/tmdb';
 import * as schemas from '../common/schemas';
@@ -8,17 +9,14 @@ import {Movie} from '../models/movie';
 import {EntityAction, EntityPayload, Normalized} from '../models/store';
 
 export default function* (): SagaIterator {
-  yield fork(watch);
+  yield takeEvery(actions.movies.request, request);
 }
 
-function* watch(): SagaIterator {
-  while (true) {
-    let action: EntityAction<number> = yield take(actions.movies.request);
-    yield race([
-      call(handle, action.payload),
-      take(actions.movies.cancel)
-    ]);
-  }
+function* request(action: EntityAction<number>): SagaIterator {
+  yield race([
+    call(handle, action.payload),
+    call(stop, action.payload)
+  ]);
 }
 
 function* handle(payload: EntityPayload<number>): SagaIterator {
@@ -31,5 +29,13 @@ function* handle(payload: EntityPayload<number>): SagaIterator {
     }));
   } catch (err) {
     yield put(actions.movies.failure(payload.id as string, err));
+  }
+}
+
+function* stop(payload: EntityPayload<number>): SagaIterator {
+  while (true) {
+    let action: PayloadAction<string> = yield take(actions.movies.cancel);
+    if (action.payload === payload.id)
+      break;
   }
 }

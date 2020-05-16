@@ -66,11 +66,10 @@ export const wrapper = new schema.Entity<Wrapper>('wrappers', {
   }
 });
 
-export const metaman = {
-  wrappers: {
-    data: [wrapper]
-  }
-};
+company.define({
+  parent_company: company
+});
 
-company.define({parent_company: company});
-collection.define({parts: [movie]});
+collection.define({
+  parts: [movie]
+});
