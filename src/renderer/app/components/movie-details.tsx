@@ -8,8 +8,8 @@ import {Image, ImageContainer} from './image';
 
 export default function MovieDetails(props: MovieDetailsProps): ReactElement {
 
-  const movie = useSelector(selectors.movies.movie(props.id));
-  const credit = useSelector(selectors.credits.credit(movie.credits as number));
+  const movie = useSelector(selectors.wrappers.movie(props.id));
+  const credit = useSelector(selectors.wrappers.credit(movie.credits as number));
 
   return (
     <>
@@ -39,7 +39,7 @@ export default function MovieDetails(props: MovieDetailsProps): ReactElement {
 
 function GenreTag(props: GenreTagProps): ReactElement {
 
-  const genre = useSelector(selectors.genres.genre(props.id));
+  const genre = useSelector(selectors.wrappers.genre(props.id));
 
   return (
     <Tag className='mr-2 mb-2' color={grey.primary}>
@@ -66,7 +66,7 @@ function Limited<T>(props: LimitedProps<T>): ReactElement {
 
 function CastCard(props: CastCardProps): ReactElement {
 
-  const cast = useSelector(selectors.casts.cast(props.id));
+  const cast = useSelector(selectors.wrappers.cast(props.id));
 
   return (
     <Card size='small' cover={<ImageContainer path={cast.profile_path} size='w185' className='h-48'/>}>
@@ -83,7 +83,7 @@ function CastCard(props: CastCardProps): ReactElement {
 
 function CrewCard(props: CrewCardProps): ReactElement {
 
-  const crew = useSelector(selectors.crews.crew(props.id));
+  const crew = useSelector(selectors.wrappers.crew(props.id));
 
   return (
     <Card size='small' cover={<ImageContainer path={crew.profile_path} size='w185' className='h-48'/>}>

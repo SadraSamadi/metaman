@@ -1,64 +1,128 @@
-import _ from 'lodash';
-import {normalize} from 'normalizr';
-import {END, eventChannel, EventChannel, SagaIterator} from 'redux-saga';
-import {call, fork, put, race, select, take, takeMaybe} from 'redux-saga/effects';
+import {PayloadAction} from '@reduxjs/toolkit';
+import {denormalize, normalize} from 'normalizr';
+import {SagaIterator} from 'redux-saga';
+import {call, delay, put, race, select, take, takeEvery} from 'redux-saga/effects';
 import actions from '../actions';
-import {scan} from '../apis/metaman';
+import {guess, submit} from '../apis/metaman';
+import {getMovie} from '../apis/tmdb';
 import * as schemas from '../common/schemas';
-import {Settings} from '../models/prefs';
-import {Normalized} from '../models/store';
+import {Movie} from '../models/movie';
+import {AppState, EntityAction, EntityPayload, Normalized} from '../models/store';
 import {Wrapper} from '../models/wrapper';
 import selectors from '../selectors';
 
 export default function* (): SagaIterator {
-  yield fork(watch);
+  yield takeEvery(actions.wrappers.guess.request, requestGuess);
+  yield takeEvery(actions.wrappers.movie.request, requestMovie);
+  yield takeEvery(actions.wrappers.scrape.request, requestScrape);
+  yield takeEvery(actions.wrappers.meta.request, requestMeta);
 }
 
-function* watch(): SagaIterator {
-  while (true) {
-    yield take(actions.wrappers.request);
-    yield race([
-      call(handle),
-      take(actions.wrappers.cancel)
-    ]);
-  }
+function* requestGuess(action: PayloadAction<string>): SagaIterator {
+  yield race([
+    call(handleGuess, action.payload),
+    call(cancelGuess, action.payload)
+  ]);
 }
 
-function* handle(): SagaIterator {
-  let settings: Settings = yield select(selectors.prefs.settings);
-  let chan: EventChannel<Wrapper> = yield call(channel, settings.directories);
+function* handleGuess(payload: string): SagaIterator {
   try {
-    while (true) {
-      let wrapper: Wrapper = yield takeMaybe(chan);
-      if (_.eq(wrapper, END))
-        break;
-      let normalized: Normalized<string> = yield call(normalize, wrapper, schemas.wrapper);
-      yield put(actions.wrappers.add(normalized));
-    }
-    yield put(actions.wrappers.success());
+    let wrapper: Wrapper = yield select(selectors.wrappers.wrapper(payload));
+    yield put(actions.wrappers.guess.success({
+      id: payload,
+      data: yield call(guess, wrapper)
+    }));
   } catch (err) {
-    yield put(actions.wrappers.failure(err));
-  } finally {
-    chan.close();
+    yield put(actions.wrappers.guess.failure(payload, err));
   }
 }
 
-function channel(dirs: string[]): EventChannel<Wrapper> {
-  return eventChannel(emit => {
-    let closed = false;
-    (async () => {
-      try {
-        for await (let wrapper of scan(dirs)) {
-          if (closed)
-            break;
-          emit(wrapper);
-        }
-        if (!closed)
-          emit(END);
-      } catch (err) {
-        emit(err);
-      }
-    })();
-    return () => closed = true;
-  });
+function* cancelGuess(payload: string): SagaIterator {
+  while (true) {
+    let action: PayloadAction<string> = yield take(actions.wrappers.guess.cancel);
+    if (action.payload === payload)
+      break;
+  }
+}
+
+function* requestMovie(action: EntityAction<number>): SagaIterator {
+  yield race([
+    call(handleMovie, action.payload),
+    call(cancelMovie, action.payload)
+  ]);
+}
+
+function* handleMovie(payload: EntityPayload<number>): SagaIterator {
+  try {
+    let movie: Movie = yield call(getMovie, payload.data);
+    let normalized: Normalized<number> = yield call(normalize, movie, schemas.movie);
+    yield put(actions.wrappers.movie.success({
+      id: payload.id,
+      data: normalized
+    }));
+  } catch (err) {
+    yield put(actions.wrappers.movie.failure(payload.id, err));
+  }
+}
+
+function* cancelMovie(payload: EntityPayload<number>): SagaIterator {
+  while (true) {
+    let action: PayloadAction<string> = yield take(actions.wrappers.movie.cancel);
+    if (action.payload === payload.id)
+      break;
+  }
+}
+
+function* requestScrape(action: PayloadAction<string>): SagaIterator {
+  yield race([
+    call(handleScrape, action.payload),
+    call(cancelScrape, action.payload)
+  ]);
+}
+
+function* handleScrape(payload: string): SagaIterator {
+  try {
+    let wrapper: Wrapper = yield select(selectors.wrappers.wrapper(payload));
+    console.log(wrapper);
+    yield delay(10000);
+    yield put(actions.wrappers.scrape.success(payload));
+  } catch (err) {
+    yield put(actions.wrappers.scrape.failure(payload, err));
+  }
+}
+
+function* cancelScrape(payload: string): SagaIterator {
+  while (true) {
+    let action: PayloadAction<string> = yield take(actions.wrappers.scrape.cancel);
+    if (action.payload === payload)
+      break;
+  }
+}
+
+function* requestMeta(action: PayloadAction<string>): SagaIterator {
+  yield race([
+    call(handleMeta, action.payload),
+    call(cancelMeta, action.payload)
+  ]);
+}
+
+function* handleMeta(payload: string): SagaIterator {
+  try {
+    let state: AppState = yield select();
+    let wrapper: Wrapper = yield call(denormalize, payload, schemas.wrapper, state);
+    yield put(actions.wrappers.meta.success({
+      id: payload,
+      data: yield call(submit, wrapper)
+    }));
+  } catch (err) {
+    yield put(actions.wrappers.meta.failure(payload, err));
+  }
+}
+
+function* cancelMeta(payload: string): SagaIterator {
+  while (true) {
+    let action: PayloadAction<string> = yield take(actions.wrappers.meta.cancel);
+    if (action.payload === payload)
+      break;
+  }
 }

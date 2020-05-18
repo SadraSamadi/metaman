@@ -7,8 +7,8 @@ import {Entity, EntityAction, Normalized} from '../models/store';
 const initialState: Entity<Collection, number> = {};
 
 export default createReducer(initialState, {
-  [actions.wrappers.request.type]: () => initialState,
-  [actions.movies.success.type]: (state, action: EntityAction<Normalized<number>>) => {
+  [actions.metaman.scan.request.type]: () => initialState,
+  [actions.wrappers.movie.success.type]: (state, action: EntityAction<Normalized<number>>) => {
     _.assign(state, action.payload.data.entities.collections);
   }
 });

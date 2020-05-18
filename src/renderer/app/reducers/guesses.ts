@@ -6,8 +6,8 @@ import {Entity, EntityAction} from '../models/store';
 const initialState: Entity<Guess> = {};
 
 export default createReducer(initialState, {
-  [actions.wrappers.request.type]: () => initialState,
-  [actions.guesses.success.type]: (state, action: EntityAction<Guess>) => {
+  [actions.metaman.scan.request.type]: () => initialState,
+  [actions.wrappers.movie.success.type]: (state, action: EntityAction<Guess>) => {
     let guess = action.payload.data;
     state[guess.id] = guess;
   }

@@ -40,9 +40,9 @@ function* handle(effect: Effect): SagaIterator {
 }
 
 function* handleSuccess(): SagaIterator {
-  let settings: Settings = yield select(selectors.prefs.settings);
-  yield call(setOptions, settings.tmdb);
-  yield call(setProxy, settings.proxy);
+  let {tmdb, proxy}: Settings = yield select(selectors.prefs.settings);
+  yield call(setOptions, tmdb);
+  yield call(setProxy, proxy);
 }
 
 async function setProxy(proxy: Proxy): Promise<void> {

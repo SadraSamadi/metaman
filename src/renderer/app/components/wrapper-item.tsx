@@ -21,8 +21,8 @@ export default function WrapperItem(props: WrapperItemProps): ReactElement {
   const dispatch = useDispatch<AppDispatch>();
   const selected = useSelector(selectors.metaman.selected);
   const wrapper = useSelector(selectors.wrappers.wrapper(props.id));
-  const movie = useSelector(selectors.movies.movie(wrapper.movie.data as number));
-  const meta = useSelector(selectors.metadata.metadata(wrapper.meta.data as string));
+  const movie = useSelector(selectors.wrappers.movie(wrapper.movie.data as number));
+  const meta = useSelector(selectors.wrappers.meta(wrapper.meta.data as string));
   const search = useSelector(selectors.search.search);
   const name = useMemo(getName, [wrapper.info, movie]);
   const update = useMemo(getUpdate, [meta]);

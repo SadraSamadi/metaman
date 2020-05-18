@@ -17,6 +17,8 @@ export interface Wrapper {
 
   meta: AsyncState<Lazy<Metadata>>;
 
+  scrape: AsyncState<void>;
+
 }
 
 export interface Info {

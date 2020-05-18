@@ -8,7 +8,7 @@ const initialState: Metaman = {
 };
 
 export default createReducer(initialState, {
-  [actions.wrappers.request.type]: state => {
+  [actions.metaman.scan.request.type]: state => {
     state.wrappers = {
       status: 'request',
       data: [],
@@ -16,16 +16,16 @@ export default createReducer(initialState, {
     };
     state.selected = null;
   },
-  [actions.wrappers.add.type]: (state, action: NormalizedAction<string>) => {
+  [actions.metaman.scan.add.type]: (state, action: NormalizedAction<string>) => {
     state.wrappers.data.push(action.payload.result);
   },
-  [actions.wrappers.cancel.type]: state => {
+  [actions.metaman.scan.cancel.type]: state => {
     state.wrappers.status = 'cancel';
   },
-  [actions.wrappers.success.type]: state => {
+  [actions.metaman.scan.success.type]: state => {
     state.wrappers.status = 'success';
   },
-  [actions.wrappers.failure.type]: (state, action: FailureAction) => {
+  [actions.metaman.scan.failure.type]: (state, action: FailureAction) => {
     state.wrappers.status = 'failure';
     state.wrappers.error = action.error;
   },

@@ -9,7 +9,7 @@ const initialState: Search = {
 };
 
 export default createReducer(initialState, {
-  [actions.wrappers.request.type]: () => initialState,
+  [actions.metaman.scan.request.type]: () => initialState,
   [actions.search.request.type]: (state, action: EntityAction<number>) => {
     state.wrapper = action.payload.id;
     state.page.status = 'request';

@@ -31,7 +31,8 @@ async function* _scan(path: string): AsyncGenerator<Wrapper> {
           status: 'success',
           data: meta,
           error: null
-        } : {}
+        } : {},
+        scrape: {}
       };
     }
   } else {

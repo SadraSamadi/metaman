@@ -28,9 +28,9 @@ export default function Header(): ReactElement {
 
   function onScan(): void {
     if (status === 'request')
-      dispatch(actions.wrappers.cancel());
+      dispatch(actions.metaman.scan.cancel());
     else
-      dispatch(actions.wrappers.request());
+      dispatch(actions.metaman.scan.request());
   }
 
   function onPrefs(): void {
