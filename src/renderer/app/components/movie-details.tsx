@@ -1,7 +1,7 @@
 import {grey} from '@ant-design/colors';
 import {Card, Divider, Tag, Tooltip} from 'antd';
 import _ from 'lodash';
-import React, {ReactElement, useMemo} from 'react';
+import React, {ReactElement, ReactNode, useMemo} from 'react';
 import {useSelector} from 'react-redux';
 import selectors from '../selectors';
 import {Image, ImageContainer} from './image';
@@ -10,8 +10,6 @@ export default function MovieDetails(props: MovieDetailsProps): ReactElement {
 
   const movie = useSelector(selectors.movies.movie(props.id));
   const credit = useSelector(selectors.credits.credit(movie.credits as number));
-  const casts = useMemo(() => _.take(credit.cast as string[], 12), [credit]);
-  const crews = useMemo(() => _.take(credit.crew as string[], 12), [credit]);
 
   return (
     <>
@@ -27,14 +25,12 @@ export default function MovieDetails(props: MovieDetailsProps): ReactElement {
         </div>
       </ImageContainer>
       <div className='px-4 pb-4'>
-        <Divider orientation='left'>Cast</Divider>
-        <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4'>
-          {casts.map(cast => <CastCard key={cast} id={cast}/>)}
-        </div>
-        <Divider orientation='left'>Crew</Divider>
-        <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4'>
-          {crews.map(crew => <CrewCard key={crew} id={crew}/>)}
-        </div>
+        <Limited title='Cast'
+                 list={credit.cast}
+                 render={(cast: string) => <CastCard key={cast} id={cast}/>}/>
+        <Limited title='Crew'
+                 list={credit.crew}
+                 render={(crew: string) => <CrewCard key={crew} id={crew}/>}/>
       </div>
     </>
   );
@@ -49,6 +45,21 @@ function GenreTag(props: GenreTagProps): ReactElement {
     <Tag className='mr-2 mb-2' color={grey.primary}>
       {genre.name}
     </Tag>
+  );
+
+}
+
+function Limited<T>(props: LimitedProps<T>): ReactElement {
+
+  const list = useMemo(() => _.take(props.list, 12), [props.list]);
+
+  return (
+    <>
+      <Divider orientation='left'>{props.title}</Divider>
+      <div className='grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-4'>
+        {list.map(props.render)}
+      </div>
+    </>
   );
 
 }
@@ -84,6 +95,16 @@ function CrewCard(props: CrewCardProps): ReactElement {
                  }/>
     </Card>
   );
+
+}
+
+interface LimitedProps<T> {
+
+  title: string;
+
+  list: T[];
+
+  render: (item: T) => ReactNode;
 
 }
 
