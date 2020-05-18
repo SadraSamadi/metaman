@@ -13,12 +13,10 @@ export default createReducer(initialState, {
   [actions.wrappers.add.type]: (state, action: NormalizedAction<string>) => {
     _.assign(state, action.payload.entities.wrappers);
   },
-  [actions.wrappers.info.type]: (state, action: EntityAction<Partial<Info>>) => {
+  [actions.wrappers.info.type]: (state, action: EntityAction<Info>) => {
     let {id, data} = action.payload;
     let wrapper = state[id];
-    _.merge(wrapper, {
-      info: data
-    });
+    _.merge(wrapper, {info: data});
   },
   [actions.guesses.request.type]: (state, action: PayloadAction<string>) => {
     let {guess} = state[action.payload];
@@ -36,12 +34,10 @@ export default createReducer(initialState, {
       info: {
         title: data.title,
         year: data.year
-      },
-      guess: {
-        status: 'success',
-        data: data.id
       }
     });
+    wrapper.guess.status = 'success';
+    wrapper.guess.data = data.id;
   },
   [actions.guesses.failure.type]: (state, action: FailureAction<string>) => {
     let {guess} = state[action.payload];

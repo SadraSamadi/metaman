@@ -9,5 +9,5 @@ export default {
   cancel: createAction('wrappers/cancel'),
   success: createAction('wrappers/success'),
   failure: createAction('wrappers/failure', (err: Error) => failure(err)),
-  info: createAction<EntityPayload<Partial<Info>>>('wrappers/info')
+  info: createAction<EntityPayload<Info>>('wrappers/info')
 };

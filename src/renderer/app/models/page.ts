@@ -4,7 +4,7 @@ export interface Page {
 
   page: number;
 
-  results: Array<Movie>;
+  results: Movie[];
 
   total_results: number;
 

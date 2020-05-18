@@ -9,7 +9,7 @@ export default function Main(): ReactElement {
   const selected = useSelector(selectors.metaman.selected);
 
   return selected ? (
-    <WrapperDetails/>
+    <WrapperDetails id={selected}/>
   ) : (
     <div className='h-full flex items-center justify-center'>
       <Empty/>

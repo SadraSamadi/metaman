@@ -15,10 +15,10 @@ export default function Header(): ReactElement {
   useEffect(() => {
     switch (status) {
       case 'cancel':
-        message.warn(`Found ${data.length} movies`);
+        message.warn(`Found ${data.length} videos`);
         break;
       case 'success':
-        message.success(`Found ${data.length} movies`);
+        message.success(`Found ${data.length} videos`);
         break;
       case 'failure':
         message.error(error);

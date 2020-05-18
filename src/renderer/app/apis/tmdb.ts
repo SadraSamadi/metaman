@@ -6,13 +6,11 @@ import {Movie} from '../models/movie';
 import {Page} from '../models/page';
 import {Options} from '../models/tmdb';
 
-const client = axios.create({
-  baseURL: TMDB_API_URL
-});
-
 let options: Options = null;
 
-client.interceptors.request.use(request => _.merge({}, request, {
+const client = axios.create({baseURL: TMDB_API_URL});
+
+client.interceptors.request.use(request => _.merge(request, {
   params: {
     api_key: options.key
   }
@@ -41,9 +39,9 @@ export async function getMovie(id: number): Promise<Movie> {
     }
   });
   let collection = data.belongs_to_collection as Collection;
-  if (collection)
-    data.belongs_to_collection = await getCollection(collection.id);
-  return data;
+  return _.assign(data, {
+    belongs_to_collection: collection && await getCollection(collection.id)
+  });
 }
 
 export async function getCollection(id: number): Promise<Collection> {

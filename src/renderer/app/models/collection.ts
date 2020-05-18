@@ -13,6 +13,6 @@ export interface Collection {
 
   backdrop_path: string;
 
-  parts: Array<Lazy<Movie, number>>;
+  parts: Lazy<Movie, number>[];
 
 }

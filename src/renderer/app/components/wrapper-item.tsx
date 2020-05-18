@@ -10,7 +10,7 @@ import classNames from 'classnames';
 import _ from 'lodash';
 import moment from 'moment';
 import {parse} from 'path';
-import React, {ReactElement, useEffect, useState} from 'react';
+import React, {ReactElement, useMemo} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import actions from '../actions';
 import {AppDispatch} from '../models/store';
@@ -24,37 +24,47 @@ export default function WrapperItem(props: WrapperItemProps): ReactElement {
   const movie = useSelector(selectors.movies.movie(wrapper.movie.data as number));
   const meta = useSelector(selectors.metadata.metadata(wrapper.meta.data as string));
   const search = useSelector(selectors.search.search);
-  const [name, setName] = useState<string>();
-  const [update, setUpdate] = useState<string>();
-  const page = search.wrapper === props.id && search.page;
+  const name = useMemo(getName, [wrapper.info, movie]);
+  const update = useMemo(getUpdate, [meta]);
+  const page = search.wrapper === wrapper.id && search.page;
+  const request = _.includes([
+    wrapper.guess.status,
+    wrapper.movie.status,
+    wrapper.meta.status,
+    page?.status
+  ], 'request');
 
-  useEffect(() => {
+  function getName(): string {
     if (movie) {
-      let year = moment(movie.release_date).year();
-      setName(`${movie.title} (${year})`);
+      let mom = moment(movie.release_date);
+      let year = mom.year();
+      return `${movie.title} (${year})`;
     } else if (wrapper.info) {
       let {title, year} = wrapper.info;
-      setName(`${title} (${year})`);
+      return `${title} (${year})`;
     } else {
       let parsed = parse(wrapper.path);
-      setName(parsed.name);
+      return parsed.name;
     }
-  }, [wrapper.info, movie]);
+  }
 
-  useEffect(() => {
-    setUpdate(meta ? moment(meta.update).fromNow() : 'NEVER');
-  }, [meta]);
+  function getUpdate(): string {
+    if (!meta)
+      return 'NEVER';
+    let mom = moment(meta.update);
+    return mom.fromNow();
+  }
 
   function onSelect(): void {
-    dispatch(actions.metaman.select(props.id));
+    dispatch(actions.metaman.select(wrapper.id));
   }
 
   return (
     <div onClick={onSelect}
          className={classNames(
-           'hover:bg-gray-200 cursor-pointer',
+           'cursor-pointer',
            'transition-colors duration-75 ease-out',
-           {'bg-gray-200': props.id === selected}
+           wrapper.id === selected ? 'bg-gray-200' : 'hover:bg-gray-100'
          )}>
       <div className='p-2'>
         <h5 className='m-0 truncate'>{name}</h5>
@@ -64,12 +74,6 @@ export default function WrapperItem(props: WrapperItemProps): ReactElement {
             <span>{update}</span>
           </div>
           {(() => {
-            let request = _.includes([
-              wrapper.guess.status,
-              wrapper.movie.status,
-              wrapper.meta.status,
-              page?.status
-            ], 'request');
             if (request)
               return <LoadingOutlined className='text-purple-500'/>;
             else if (wrapper.meta.data)

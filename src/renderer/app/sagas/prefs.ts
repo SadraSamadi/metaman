@@ -1,10 +1,11 @@
 import {PayloadAction} from '@reduxjs/toolkit';
+import {remote} from 'electron';
 import {SagaIterator} from 'redux-saga';
 import {call, Effect, put, select, takeLatest} from 'redux-saga/effects';
 import actions from '../actions';
 import {init, reset, save} from '../apis/prefs';
 import {setOptions} from '../apis/tmdb';
-import {Settings} from '../models/prefs';
+import {Proxy, Settings} from '../models/prefs';
 import selectors from '../selectors';
 
 export default function* (): SagaIterator {
@@ -41,4 +42,11 @@ function* handle(effect: Effect): SagaIterator {
 function* handleSuccess(): SagaIterator {
   let settings: Settings = yield select(selectors.prefs.settings);
   yield call(setOptions, settings.tmdb);
+  yield call(setProxy, settings.proxy);
+}
+
+async function setProxy(proxy: Proxy): Promise<void> {
+  let {webContents} = remote.getCurrentWindow();
+  let url = proxy.enable ? `${proxy.protocol}=${proxy.host}:${proxy.port},` : '';
+  await webContents.session.setProxy({proxyRules: url + 'direct://'});
 }

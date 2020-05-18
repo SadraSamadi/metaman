@@ -11,10 +11,24 @@ export interface Preferences {
 
 export interface Settings {
 
+  directories: string[];
+
   tmdb: Tmdb;
 
-  directories: Array<string>;
+  proxy: Proxy;
 
 }
 
 export type Status = 'init' | 'save' | 'reset' | 'success' | 'failure';
+
+export interface Proxy {
+
+  enable: boolean;
+
+  protocol: 'http' | 'https' | 'socks';
+
+  host?: string;
+
+  port?: number;
+
+}

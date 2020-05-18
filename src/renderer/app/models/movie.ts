@@ -18,9 +18,9 @@ export interface Movie {
 
   credits: Lazy<Credit, number>;
 
-  genre_ids: Array<number>;
+  genre_ids: number[];
 
-  genres: Array<Lazy<Genre, number>>;
+  genres: Lazy<Genre, number>[];
 
   homepage: string;
 
@@ -38,9 +38,9 @@ export interface Movie {
 
   poster_path: string;
 
-  production_companies: Array<Lazy<Company, number>>;
+  production_companies: Lazy<Company, number>[];
 
-  production_countries: Array<Lazy<Country>>;
+  production_countries: Lazy<Country>[];
 
   release_date: string;
 
@@ -48,7 +48,7 @@ export interface Movie {
 
   runtime: number;
 
-  spoken_languages: Array<Lazy<Language>>;
+  spoken_languages: Lazy<Language>[];
 
   status: 'Rumored' | 'Planned' | 'In Production' | 'Post Production' | 'Released' | 'Canceled';
 

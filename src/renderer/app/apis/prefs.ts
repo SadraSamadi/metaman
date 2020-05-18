@@ -3,7 +3,7 @@ import _ from 'lodash';
 import {DEFAULT_SETTINGS} from '../common/constants';
 import {Settings} from '../models/prefs';
 
-let storage: ElectronStore<Settings>;
+let storage: ElectronStore<Settings> = null;
 
 export function init(): Settings {
   storage = new ElectronStore({

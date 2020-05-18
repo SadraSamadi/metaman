@@ -10,12 +10,12 @@ export default function WrapperList(): ReactElement {
 
   return data?.length ? (
     <div className='max-h-full overflow-y-auto'>
-      {data.map((wrapper: string) => (
-        <WrapperItem key={wrapper} id={wrapper}/>)
-      )}
+      {data.map(wrapper => <WrapperItem key={wrapper} id={wrapper}/>)}
     </div>
   ) : (
-    <Empty className='mt-32'/>
+    <div className='h-full flex items-center justify-center'>
+      <Empty className='mt-32'/>
+    </div>
   );
 
 }

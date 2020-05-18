@@ -6,8 +6,8 @@ export interface Credit {
 
   id: number;
 
-  cast: Array<Lazy<Cast>>;
+  cast: Lazy<Cast>[];
 
-  crew: Array<Lazy<Crew>>;
+  crew: Lazy<Crew>[];
 
 }

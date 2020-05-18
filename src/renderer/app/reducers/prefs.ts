@@ -1,4 +1,5 @@
 import {CaseReducer, createReducer, PayloadAction} from '@reduxjs/toolkit';
+import _ from 'lodash';
 import actions from '../actions';
 import {Preferences, Settings, Status} from '../models/prefs';
 import {FailureAction} from '../models/store';
@@ -13,8 +14,10 @@ export default createReducer(initialState, {
   [actions.prefs.save.type]: request('save'),
   [actions.prefs.reset.type]: request('reset'),
   [actions.prefs.success.type]: (state, action: PayloadAction<Settings>) => {
-    state.settings.status = 'success';
-    state.settings.data = action.payload;
+    _.merge(state.settings, {
+      status: 'success',
+      data: action.payload
+    });
     state.modal = false;
   },
   [actions.prefs.failure.type]: (state, action: FailureAction) => {

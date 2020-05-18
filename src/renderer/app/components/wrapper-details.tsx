@@ -10,98 +10,91 @@ import {ImageContainer} from './image';
 import MovieDetails from './movie-details';
 import Scrape from './scrape';
 
-export default function WrapperDetails(): ReactElement {
+export default function WrapperDetails(props: WrapperDetailsProps): ReactElement {
 
   const dispatch = useDispatch<AppDispatch>();
-  const selected = useSelector(selectors.metaman.selected);
-  const wrapper = useSelector(selectors.wrappers.wrapper(selected));
-  const meta = useSelector(selectors.metadata.metadata(wrapper.meta.data as string));
+  const {path, info, guess, movie, meta} = useSelector(selectors.wrappers.wrapper(props.id));
+  const metadata = useSelector(selectors.metadata.metadata(meta.data as string));
   const search = useSelector(selectors.search.search);
-  const onChangeDebounced = useMemo(
-    () => _.debounce(onChange, 200),
-    [selected]
-  );
+  const onChangeDebounced = useMemo(() => _.debounce(onChange, 300), [props.id]);
   const [form] = Form.useForm();
-  const page = search.wrapper === selected && search.page;
+  const page = search.wrapper === props.id && search.page;
 
   useEffect(() => {
-    if (wrapper.info)
-      form.setFieldsValue(wrapper.info);
+    if (info)
+      form.setFieldsValue(info);
     else
       form.resetFields();
-  }, [wrapper.info]);
+  }, [info]);
 
   useEffect(() => {
-    if (wrapper.guess.status === 'failure')
-      message.error(wrapper.guess.error);
-    else if (wrapper.movie.status === 'failure')
-      message.error(wrapper.movie.error);
-    else if (wrapper.meta.status === 'failure')
-      message.error(wrapper.meta.error);
-    else if (page?.status === 'failure')
+    if (guess.status === 'failure')
+      message.error(guess.error);
+    if (movie.status === 'failure')
+      message.error(movie.error);
+    if (meta.status === 'failure')
+      message.error(meta.error);
+    if (page?.status === 'failure')
       message.error(page.error);
-    else if (page?.status === 'success' && !page.data.results.length)
+    if (page?.status === 'success' && !page.data.results.length)
       message.warn('No results');
-  }, [wrapper.guess.status, wrapper.movie.status, wrapper.meta.status, page?.status]);
+  }, [guess.status, movie.status, meta.status, page?.status]);
 
-  function onChange(data: Partial<Guess>): void {
-    dispatch(actions.wrappers.info({
-      id: selected,
-      data
-    }));
+  function onChange(data: Guess): void {
+    dispatch(actions.wrappers.info({id: props.id, data}));
   }
 
   function onGuess(): void {
-    dispatch(actions.guesses.request(selected));
+    dispatch(actions.guesses.request(props.id));
   }
 
   function onSearch(): void {
     dispatch(actions.search.request({
-      id: selected,
+      id: props.id,
       data: undefined
     }));
   }
 
   function onMovie(id: number): void {
     dispatch(actions.movies.request({
-      id: selected,
+      id: props.id,
       data: id
     }));
   }
 
   function onMeta(): void {
-    dispatch(actions.metadata.request(selected));
+    dispatch(actions.metadata.request(props.id));
   }
 
   return (
     <div className='h-full flex flex-col'>
       <div className='flex-none p-4'>
         <div className='mb-4 flex items-center'>
-          <Tooltip title={wrapper.path} placement='bottom' className='flex-1 mr-2'>
-            <h4 className='m-0 truncate'>{wrapper.path}</h4>
+          <Tooltip placement='bottom' title={path} className='flex-1 mr-2'>
+            <h4 className='m-0 truncate'>{path}</h4>
           </Tooltip>
           <Space className='flex-none'>
             <Button type='primary'
                     onClick={onGuess}
-                    loading={wrapper.guess.status === 'request'}>
+                    loading={guess.status === 'request'}>
               Guess
             </Button>
             <Button type='primary'
                     onClick={onSearch}
-                    disabled={!wrapper.info}
+                    disabled={!info}
                     loading={page?.status === 'request'}>
               Search
             </Button>
             <Button type='primary'
                     onClick={onMeta}
-                    disabled={wrapper.movie.status !== 'success'}
-                    loading={wrapper.meta.status === 'request'}>
+                    disabled={movie.status !== 'success'}
+                    loading={meta.status === 'request'}>
               Meta
             </Button>
             <Button type='primary'
-                    disabled={!meta}
-                    onClick={() => onMovie(meta.tmdb)}
-                    loading={wrapper.movie.status === 'request'}>
+                    disabled={!metadata}
+                    onClick={() => onMovie(metadata.tmdb)}
+                    loading={movie.status === 'request'}>
               Movie
             </Button>
           </Space>
@@ -136,12 +129,16 @@ export default function WrapperDetails(): ReactElement {
             ))}
           </div>
         )}
-        {wrapper.movie.data && (
-          <MovieDetails/>
-        )}
+        {movie.data && <MovieDetails id={movie.data as number}/>}
       </div>
       <Scrape/>
     </div>
   );
+
+}
+
+interface WrapperDetailsProps {
+
+  id: string;
 
 }

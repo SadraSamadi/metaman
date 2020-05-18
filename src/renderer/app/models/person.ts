@@ -10,7 +10,7 @@ export interface Person {
 
   name: string;
 
-  also_known_as: Array<string>;
+  also_known_as: string[];
 
   gender: number;
 

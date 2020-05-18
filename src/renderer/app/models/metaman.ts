@@ -3,7 +3,7 @@ import {Wrapper} from './wrapper';
 
 export interface Metaman {
 
-  wrappers: AsyncState<Array<Lazy<Wrapper>>>;
+  wrappers: AsyncState<Lazy<Wrapper>[]>;
 
   selected?: string;
 

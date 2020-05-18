@@ -9,9 +9,11 @@ const initialState: Metaman = {
 
 export default createReducer(initialState, {
   [actions.wrappers.request.type]: state => {
-    state.wrappers.status = 'request';
-    state.wrappers.data = [];
-    state.wrappers.error = null;
+    state.wrappers = {
+      status: 'request',
+      data: [],
+      error: null
+    };
     state.selected = null;
   },
   [actions.wrappers.add.type]: (state, action: NormalizedAction<string>) => {
