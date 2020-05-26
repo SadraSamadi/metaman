@@ -1,10 +1,11 @@
-import {AsyncState, Lazy} from './store';
-import {Wrapper} from './wrapper';
+import {AsyncState} from './store';
 
 export interface Metaman {
 
-  wrappers: AsyncState<Lazy<Wrapper>[]>;
+  wrappers: AsyncState<string[]>;
 
   selected?: string;
+
+  preview: AsyncState<string>;
 
 }

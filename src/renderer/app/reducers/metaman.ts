@@ -4,7 +4,8 @@ import {Metaman} from '../models/metaman';
 import {FailureAction, NormalizedAction} from '../models/store';
 
 const initialState: Metaman = {
-  wrappers: {}
+  wrappers: {},
+  preview: {}
 };
 
 export default createReducer(initialState, {
@@ -28,6 +29,21 @@ export default createReducer(initialState, {
   [actions.metaman.scan.failure.type]: (state, action: FailureAction) => {
     state.wrappers.status = 'failure';
     state.wrappers.error = action.error;
+  },
+  [actions.metaman.preview.request.type]: state => {
+    state.preview.status = 'request';
+    state.preview.error = null;
+  },
+  [actions.metaman.preview.cancel.type]: state => {
+    state.preview.status = 'cancel';
+  },
+  [actions.metaman.preview.success.type]: (state, action: NormalizedAction<string>) => {
+    state.preview.status = 'success';
+    state.preview.data = action.payload.result;
+  },
+  [actions.metaman.preview.failure.type]: (state, action: FailureAction) => {
+    state.preview.status = 'failure';
+    state.preview.error = action.error;
   },
   [actions.metaman.select.type]: (state, action: PayloadAction<string>) => {
     state.selected = action.payload;

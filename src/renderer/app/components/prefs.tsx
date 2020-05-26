@@ -1,8 +1,8 @@
-import {DeleteOutlined} from '@ant-design/icons/lib';
+import {DeleteOutlined, InfoCircleOutlined} from '@ant-design/icons/lib';
 import {Alert, Button, Empty, Form, Input, InputNumber, Modal, Select, Switch, Tabs, Tooltip} from 'antd';
 import {FormInstance} from 'antd/lib/form';
 import classNames from 'classnames';
-import {remote} from 'electron';
+import {remote, shell} from 'electron';
 import _ from 'lodash';
 import React, {forwardRef, ReactElement, useRef} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
@@ -10,6 +10,8 @@ import actions from '../actions';
 import {Settings, Status} from '../models/prefs';
 import {AppDispatch} from '../models/store';
 import selectors from '../selectors';
+
+const height = 500;
 
 export default function Prefs(): ReactElement {
 
@@ -52,7 +54,7 @@ export default function Prefs(): ReactElement {
                </Button>
                <div className='flex-1 mx-2 text-left'>
                  {settings.status === 'failure' && (
-                   <Alert type='error' message={settings.error} showIcon/>
+                   <Alert type='error' showIcon message={settings.error}/>
                  )}
                </div>
                <Button disabled={request} onClick={onCancel}>Cancel</Button>
@@ -82,7 +84,7 @@ const PrefsForm = forwardRef<FormInstance, PrefsFormProps>((props, ref) => {
     if (res.canceled)
       return;
     let dir = res.filePaths[0];
-    let dirs = form.getFieldValue('directories');
+    let dirs = form.getFieldValue('dirs');
     if (!_.includes(dirs, dir))
       operation.add(dir);
   }
@@ -94,14 +96,14 @@ const PrefsForm = forwardRef<FormInstance, PrefsFormProps>((props, ref) => {
           wrapperCol={{span: 18}}
           initialValues={props.settings}>
       <Tabs size='small' tabPosition='left'>
-        <Tabs.TabPane key='directories' tab='Directories'>
-          <Form.List name='directories'>
+        <Tabs.TabPane key='dirs' tab='Directories'>
+          <Form.List name='dirs'>
             {(fields, operation) => (
-              <div style={{height: 400}} className='flex flex-col'>
+              <div style={{height}} className='flex flex-col'>
                 <div className='flex-1 p-4 overflow-y-auto'>
                   {fields.length ? (
                     fields.map(field => {
-                      let dir = form.getFieldValue(['directories', field.name]);
+                      let dir = form.getFieldValue(['dirs', field.name]);
                       return (
                         <div key={field.key}
                              className={classNames(
@@ -134,7 +136,7 @@ const PrefsForm = forwardRef<FormInstance, PrefsFormProps>((props, ref) => {
           </Form.List>
         </Tabs.TabPane>
         <Tabs.TabPane key='tmdb' tab='The Movie DB'>
-          <div style={{height: 400}} className='p-4'>
+          <div style={{height}} className='p-4'>
             <Form.Item name={['tmdb', 'key']} label='API Key' rules={[{required: true}]}>
               <Input/>
             </Form.Item>
@@ -149,8 +151,54 @@ const PrefsForm = forwardRef<FormInstance, PrefsFormProps>((props, ref) => {
             </Form.Item>
           </div>
         </Tabs.TabPane>
+        <Tabs.TabPane key='man' tab='Management'>
+          <div style={{height}} className='p-4 overflow-y-auto'>
+            {(() => {
+              let suffix = (
+                <Tooltip title={
+                  <>
+                    <p className='m-0'>$&#123;title&#125; - Movie title</p>
+                    <p className='m-0'>$&#123;year&#125; - Movie release year</p>
+                  </>
+                }>
+                  <InfoCircleOutlined/>
+                </Tooltip>
+              );
+              return (
+                <>
+                  <Form.Item label='Folder Name'
+                             name={['man', 'folder']}>
+                    <Input suffix={suffix}/>
+                  </Form.Item>
+                  <Form.Item label='Movie Name'
+                             name={['man', 'name']}>
+                    <Input suffix={suffix}/>
+                  </Form.Item>
+                  <Form.Item valuePropName='checked'
+                             label='Save Backdrop'
+                             name={['man', 'backdrop', 'save']}>
+                    <Switch/>
+                  </Form.Item>
+                  <Form.Item label='Backdrop Name'
+                             name={['man', 'backdrop', 'name']}>
+                    <Input suffix={suffix}/>
+                  </Form.Item>
+                  <Form.Item valuePropName='checked'
+                             label='Save Poster'
+                             name={['man', 'poster', 'save']}>
+                    <Switch/>
+                  </Form.Item>
+                  <Form.Item label='Poster Name'
+                             name={['man', 'poster', 'name']}>
+                    <Input suffix={suffix}/>
+                  </Form.Item>
+                </>
+              );
+            })()}
+          </div>
+        </Tabs.TabPane>
         <Tabs.TabPane key='proxy' tab='Proxy'>
-          <div style={{height: 400}} className='p-4'>
+          <div style={{height}} className='p-4'>
             <Form.Item valuePropName='checked' name={['proxy', 'enable']} label='Enable'>
               <Switch/>
             </Form.Item>
@@ -167,6 +215,32 @@ const PrefsForm = forwardRef<FormInstance, PrefsFormProps>((props, ref) => {
             <Form.Item name={['proxy', 'port']} label='Port' rules={[{type: 'number', min: 0, max: 65535}]}>
               <InputNumber/>
             </Form.Item>
+          </div>
+        </Tabs.TabPane>
+        <Tabs.TabPane key='about' tab='About'>
+          <div style={{height}} className='px-4 pb-4 flex flex-col items-center justify-center'>
+            <h2>Metaman</h2>
+            <h4>
+              <span className='font-bold'>Version: </span>
+              <span>1.0.0</span>
+            </h4>
+            <h4>
+              <span className='font-bold'>Developer: </span>
+              <span>Sadra Samadi</span>
+            </h4>
+            <h4>
+              <span className='font-bold'>E-Mail: </span>
+              <a onClick={() => shell.openExternal('mailto:sadra.smd@gmail.com')}>
+                sadra.smd@gmail.com
+              </a>
+            </h4>
+            <h4>
+              <span className='font-bold'>Powered By: </span>
+              <a onClick={() => shell.openExternal('https://themoviedb.org/')}>
+                The Movie DB
+              </a>
+            </h4>
+            <h5>Copyright &copy; 2020</h5>
           </div>
         </Tabs.TabPane>
       </Tabs>

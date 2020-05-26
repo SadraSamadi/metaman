@@ -1,6 +1,6 @@
 import {Metadata} from './metadata';
 
-export interface Meta {
+export interface Managed {
 
   path: string;
 

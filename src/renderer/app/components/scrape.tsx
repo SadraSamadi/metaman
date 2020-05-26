@@ -13,7 +13,12 @@ export default function Scrape(props: ScrapeProps): ReactElement {
 
   const dispatch = useDispatch<AppDispatch>();
   const {path, scrape} = useSelector(selectors.wrappers.wrapper(props.wrapper));
-  const {base} = useMemo(() => parse(path), [path]);
+  const name = useMemo(getName, [path]);
+
+  function getName(): string {
+    let {name} = parse(path);
+    return name;
+  }
 
   function onCancel(): void {
     dispatch(actions.wrappers.scrape.cancel(props.wrapper));
@@ -28,7 +33,7 @@ export default function Scrape(props: ScrapeProps): ReactElement {
            bodyStyle={{padding: 0}}
            visible={scrape.status === 'request'}
            footer={<Button onClick={onCancel}>Cancel</Button>}
-           title={<h4 className='m-0 mr-8 truncate'>{base}</h4>}>
+           title={<h4 className='m-0 mr-8 truncate'>{name}</h4>}>
       <Content wrapper={props.wrapper}/>
     </Modal>
   );

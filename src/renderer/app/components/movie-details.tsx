@@ -1,14 +1,15 @@
 import {grey} from '@ant-design/colors';
 import {Card, Divider, Tag, Tooltip} from 'antd';
-import _ from 'lodash';
-import React, {ReactElement, ReactNode, useMemo} from 'react';
+import React, {ReactElement, ReactNode} from 'react';
 import {useSelector} from 'react-redux';
+import {Movie} from '../models/movie';
 import selectors from '../selectors';
 import {Image, ImageContainer} from './image';
 
 export default function MovieDetails(props: MovieDetailsProps): ReactElement {
 
   const movie = useSelector(selectors.wrappers.movie(props.id));
+  const collection = useSelector(selectors.wrappers.collection(movie.belongs_to_collection as number));
   const credit = useSelector(selectors.wrappers.credit(movie.credits as number));
 
   return (
@@ -25,6 +26,11 @@ export default function MovieDetails(props: MovieDetailsProps): ReactElement {
         </div>
       </ImageContainer>
       <div className='px-4 pb-4'>
+        {collection && (
+          <Limited title='Collection'
+                   list={collection.parts}
+                   render={part => <PartCard key={part.id} part={part}/>}/>
+        )}
         <Limited title='Cast'
                  list={credit.cast}
                  render={(cast: string) => <CastCard key={cast} id={cast}/>}/>
@@ -51,15 +57,29 @@ function GenreTag(props: GenreTagProps): ReactElement {
 
 function Limited<T>(props: LimitedProps<T>): ReactElement {
 
-  const list = useMemo(() => _.take(props.list, 12), [props.list]);
+  // TODO: Add 'More' button
 
   return (
     <>
       <Divider orientation='left'>{props.title}</Divider>
       <div className='grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-4'>
-        {list.map(props.render)}
+        {props.list.map(props.render)}
       </div>
     </>
+  );
+
+}
+
+function PartCard(props: PartCardProps): ReactElement {
+
+  const {poster_path, release_date, title} = props.part;
+
+  return (
+    <Card hoverable
+          size='small'
+          cover={<ImageContainer path={poster_path} size='w185' className='h-48'/>}>
+      <Card.Meta title={release_date} description={title}/>
+    </Card>
   );
 
 }
@@ -121,6 +141,12 @@ interface LimitedProps<T> {
   list: T[];
 
   render: (item: T) => ReactNode;
+
+}
+
+export interface PartCardProps {
+
+  part: Movie;
 
 }
 

@@ -1,1 +1,3 @@
 # Metaman
+
+Movie metadata management.

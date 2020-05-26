@@ -3,7 +3,7 @@ import {denormalize, normalize} from 'normalizr';
 import {SagaIterator} from 'redux-saga';
 import {call, cancelled, put, race, select, take, takeEvery} from 'redux-saga/effects';
 import actions from '../actions';
-import {guess, meta} from '../apis/metaman';
+import {guess, manage} from '../apis/metaman';
 import {getMovie} from '../apis/tmdb';
 import * as schemas from '../common/schemas';
 import {Movie} from '../models/movie';
@@ -124,10 +124,9 @@ function* handleMeta(payload: string): SagaIterator {
     let wrapper: Wrapper = yield call(denormalize, payload, schemas.wrapper, state);
     yield put(actions.wrappers.meta.success({
       id: payload,
-      data: yield call(meta, wrapper, settings.options)
+      data: yield call(manage, wrapper, settings.man)
     }));
   } catch (err) {
-    console.error(err);
     yield put(actions.wrappers.meta.failure(payload, err));
   }
 }

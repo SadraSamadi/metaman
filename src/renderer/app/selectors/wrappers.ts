@@ -8,6 +8,8 @@ export const movie = selector((state, id: number) => state.movies[id]);
 
 export const genre = selector((state, id: number) => state.genres[id]);
 
+export const collection = selector((state, id: number) => state.collections[id]);
+
 export const credit = selector((state, id: number) => state.credits[id]);
 
 export const cast = selector((state, id: string) => state.casts[id]);

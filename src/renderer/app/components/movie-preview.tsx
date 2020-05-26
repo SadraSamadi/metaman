@@ -1,34 +1,43 @@
-import {Spin} from 'antd';
-import fse from 'fs-extra';
+import {Alert, Spin} from 'antd';
 import query from 'query-string';
-import React, {ReactElement, useEffect, useState} from 'react';
+import React, {ReactElement, useEffect} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
 import {RouteComponentProps} from 'react-router';
-import {getMovie} from '../apis/tmdb';
-import {Metadata} from '../models/metadata';
+import actions from '../actions';
+import {AppDispatch} from '../models/store';
+import selectors from '../selectors';
+import WrapperDetails from './wrapper-details';
 
 export default function MoviePreview(props: RouteComponentProps): ReactElement {
 
-  const [data, setData] = useState<string>();
+  const dispatch = useDispatch<AppDispatch>();
+  const prefs = useSelector(selectors.prefs.prefs);
+  const {status, data, error} = useSelector(selectors.metaman.preview);
 
   useEffect(() => {
-    (async () => {
+    if (prefs.settings.status === 'success') {
       let {file} = query.parse(props.location.search);
-      let data = await fse.readFile(file as string, 'urf8');
-      let meta: Metadata = JSON.parse(data);
-      let movie = await getMovie(meta.tmdb);
-      let str = JSON.stringify(movie, null, 2);
-      setData(str);
-    })();
-  }, []);
+      dispatch(actions.metaman.preview.request(file as string));
+    }
+  }, [prefs.settings.status]);
 
-  return data ? (
-    <div className='whitespace-pre-wrap overflow-y-auto'>
-      {data}
-    </div>
-  ) : (
-    <div className='h-full flex items-center justify-center'>
-      <Spin size='large'/>
-    </div>
-  );
+  switch (status) {
+    case 'success':
+      return (
+        <WrapperDetails className='overflow-hidden' id={data}/>
+      );
+    case 'failure':
+      return (
+        <div className='h-full flex items-center justify-center'>
+          <Alert type='error' showIcon message='Failed' description={error}/>
+        </div>
+      );
+    default:
+      return (
+        <div className='h-full flex items-center justify-center'>
+          <Spin size='large'/>
+        </div>
+      );
+  }
 
 }

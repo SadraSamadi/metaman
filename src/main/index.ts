@@ -3,8 +3,8 @@ import {app, BrowserWindow, Menu} from 'electron';
 import {is} from 'electron-util';
 import windowStateKeeper from 'electron-window-state';
 import _ from 'lodash';
-import path from 'path';
-import url from 'url';
+import {join} from 'path';
+import {format} from 'url';
 import yargs from 'yargs';
 
 (async () => {
@@ -44,17 +44,17 @@ import yargs from 'yargs';
     win.webContents.openDevTools();
   win.on('closed', () => app.quit());
   let file = _.head(yargs.argv._);
-  let renderer = url.format(is.development ? {
+  let url = format(is.development ? {
     protocol: 'http',
     hostname: process.env.HOST,
     port: process.env.PORT
   } : {
     protocol: 'file',
-    pathname: path.join(__dirname, '../renderer/index.html'),
-    hash: file && url.format({
+    pathname: join(__dirname, '../renderer/index.html'),
+    hash: file && format({
       pathname: '/movie',
       query: {file}
     })
   });
-  await win.loadURL(renderer);
+  await win.loadURL(url);
 })();

@@ -2,7 +2,7 @@ import {createReducer, PayloadAction} from '@reduxjs/toolkit';
 import _ from 'lodash';
 import actions from '../actions';
 import {Guess} from '../models/guessit';
-import {Meta} from '../models/meta';
+import {Managed} from '../models/managed';
 import {Entity, EntityAction, FailureAction, Normalized, NormalizedAction} from '../models/store';
 import {Info, Wrapper} from '../models/wrapper';
 
@@ -11,6 +11,9 @@ const initialState: Entity<Wrapper> = {};
 export default createReducer(initialState, {
   [actions.metaman.scan.request.type]: () => initialState,
   [actions.metaman.scan.add.type]: (state, action: NormalizedAction<string>) => {
+    _.assign(state, action.payload.entities.wrappers);
+  },
+  [actions.metaman.preview.success.type]: (state, action: NormalizedAction<string>) => {
     _.assign(state, action.payload.entities.wrappers);
   },
   [actions.wrappers.info.type]: (state, action: EntityAction<Info>) => {
@@ -91,7 +94,7 @@ export default createReducer(initialState, {
     let {meta} = state[action.payload];
     meta.status = 'cancel';
   },
-  [actions.wrappers.meta.success.type]: (state, action: EntityAction<Meta>) => {
+  [actions.wrappers.meta.success.type]: (state, action: EntityAction<Managed>) => {
     let {id, data} = action.payload;
     let wrapper = state[id];
     wrapper.path = data.path;

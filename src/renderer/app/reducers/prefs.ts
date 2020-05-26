@@ -14,10 +14,8 @@ export default createReducer(initialState, {
   [actions.prefs.save.type]: request('save'),
   [actions.prefs.reset.type]: request('reset'),
   [actions.prefs.success.type]: (state, action: PayloadAction<Settings>) => {
-    _.merge(state.settings, {
-      status: 'success',
-      data: action.payload
-    });
+    state.settings.status = 'success';
+    state.settings.data = _.assign(state.settings.data, action.payload);
     state.modal = false;
   },
   [actions.prefs.failure.type]: (state, action: FailureAction) => {

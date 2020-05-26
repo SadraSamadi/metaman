@@ -4,16 +4,15 @@ import fse from 'fs-extra';
 import _ from 'lodash';
 import mime from 'mime';
 import moment from 'moment';
-import {join, parse} from 'path';
+import {basename, dirname, extname, join} from 'path';
 import * as uuid from 'uuid';
 import {META_EXT, META_VER} from '../common/constants';
 import {imageUrl} from '../common/util';
-import {Collection} from '../models/collection';
 import {Guess} from '../models/guessit';
-import {Meta} from '../models/meta';
+import {Managed} from '../models/managed';
+import {Management} from '../models/management';
 import {Metadata} from '../models/metadata';
 import {Movie} from '../models/movie';
-import {Options} from '../models/options';
 import {Wrapper} from '../models/wrapper';
 import {guessit} from './guessit';
 
@@ -23,87 +22,113 @@ export async function* scan(dirs: string[]): AsyncGenerator<Wrapper> {
       yield* _scan(dir);
 }
 
-async function* _scan(path: string): AsyncGenerator<Wrapper> {
-  let stat = await fse.stat(path);
-  if (stat.isFile()) {
-    let type = mime.getType(path);
-    if (_.startsWith(type, 'video')) {
-      let meta = await getMeta(path);
-      yield {
-        id: meta?.id || uuid.v4(),
-        path: path,
-        guess: {},
-        movie: {},
-        meta: meta ? {
-          status: 'success',
-          data: meta,
-          error: null
-        } : {},
-        scrape: {}
-      };
-    }
+async function* _scan(dir: string): AsyncGenerator<Wrapper> {
+  let names = await fse.readdir(dir);
+  // TODO: Handle more complex cases
+  if (_.includes(names, META_EXT)) {
+    let path = join(dir, META_EXT);
+    yield fromMeta(path, dir);
   } else {
-    let names = await fse.readdir(path);
     for (let name of names) {
-      let child = join(path, name);
-      yield* _scan(child);
+      let child = join(dir, name);
+      let stat = await fse.stat(child);
+      if (stat.isFile()) {
+        let type = mime.getType(child);
+        if (_.startsWith(type, 'video'))
+          yield fromVideo(child);
+      } else if (stat.isDirectory()) {
+        yield* _scan(child);
+      }
     }
   }
 }
 
+export async function fromVideo(path: string): Promise<Wrapper> {
+  return {
+    path,
+    id: uuid.v4(),
+    guess: {},
+    movie: {},
+    scrape: {},
+    meta: {}
+  };
+}
+
+export async function fromMeta(path: string, dir = dirname(path)): Promise<Wrapper> {
+  let meta = await getMeta(path);
+  return {
+    id: meta.id,
+    path: join(dir, meta.video),
+    guess: {},
+    movie: {},
+    scrape: {},
+    meta: {
+      status: 'success',
+      data: meta,
+      error: null
+    }
+  };
+}
+
 async function getMeta(path: string): Promise<Metadata> {
-  let {dir} = parse(path);
-  let file = join(dir, META_EXT);
-  if (await fse.pathExists(file))
-    return fse.readJSON(file);
+  // TODO: Validate schema
+  let data = await fse.readFile(path, 'utf8');
+  return JSON.parse(data);
 }
 
 export async function guess(wrapper: Wrapper): Promise<Guess> {
   let data = await guessit(wrapper.path);
-  return _.assign(data, {
-    id: wrapper.id
-  });
+  return _.assign(data, {id: wrapper.id});
 }
 
-export async function meta(wrapper: Wrapper, opts: Options): Promise<Meta> {
-  let parsed = parse(wrapper.path);
+export async function manage(wrapper: Wrapper, man: Management): Promise<Managed> {
+  // TODO: Add save collection option
+  // TODO: Add update option
   let movie = wrapper.movie.data as Movie;
-  let metadata = wrapper.meta.data as Metadata;
-  let root = await saveCollection(parsed.dir, movie, opts);
-  let title = filenamify(movie.title, {replacement: '-'});
-  let year = moment(movie.release_date).year();
-  let dir = join(root, `[${year}] ${title}`);
-  await fse.ensureDir(dir);
-  await dlimg(movie.poster_path, dir, 'poster');
-  let path = join(dir, `${title} (${year})` + parsed.ext);
-  let file = join(dir, META_EXT);
+  let params = {
+    title: movie.title,
+    year: moment(movie.release_date).year()
+  };
   let meta: Metadata = {
     id: wrapper.id,
-    tmdb: movie.id,
     version: META_VER,
     update: Date.now(),
-    original: metadata?.original || parsed.base
+    tmdb: movie.id,
+    original: basename(wrapper.path),
+    video: format(man.name, params) + extname(wrapper.path),
+    backdrop: null,
+    poster: null
   };
-  let str = JSON.stringify(meta);
-  await fse.writeFile(file, str);
+  let dir = join(
+    dirname(wrapper.path),
+    format(man.folder, params)
+  );
+  await fse.mkdir(dir);
+  if (man.backdrop.save && movie.backdrop_path) {
+    meta.backdrop = format(man.backdrop.name, params) + extname(movie.backdrop_path);
+    await dlimg(movie.backdrop_path, dir, meta.backdrop);
+  }
+  if (man.poster.save && movie.poster_path) {
+    meta.poster = format(man.poster.name, params) + extname(movie.poster_path);
+    await dlimg(movie.poster_path, dir, meta.poster);
+  }
+  let path = join(dir, meta.video);
+  await fse.move(wrapper.path, path);
+  await fse.writeFile(
+    join(dir, META_EXT),
+    JSON.stringify(meta),
+    'utf8'
+  );
   return {path, meta};
 }
 
-async function saveCollection(dir: string, movie: Movie, opts: Options): Promise<string> {
-  let collection = movie.belongs_to_collection as Collection;
-  if (!collection)
-    return dir;
-  let name = filenamify(collection.name);
-  let root = join(dir, name);
-  await fse.ensureDir(root);
-  await dlimg(collection.poster_path, root, 'poster');
-  return root;
+function format(template: string, params: object): string {
+  let parser = _.template(template);
+  let parsed = parser(params);
+  return filenamify(parsed);
 }
 
-async function dlimg(path: string, dir: string, name: string): Promise<void> {
+async function dlimg(path: string, dir: string, filename: string): Promise<void> {
   let url = imageUrl(path);
-  let {ext} = parse(path);
-  await download(url, dir, {
-    filename: name + ext
-  });
+  await download(url, dir, {filename});
 }

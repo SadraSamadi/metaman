@@ -35,8 +35,7 @@ export default function WrapperItem(props: WrapperItemProps): ReactElement {
 
   function getName(): string {
     if (movie) {
-      let mom = moment(movie.release_date);
-      let year = mom.year();
+      let year = moment(movie.release_date).year();
       return `${movie.title} (${year})`;
     } else if (wrapper.info?.title) {
       let {title, year} = wrapper.info;

@@ -1,9 +1,10 @@
+import {PayloadAction} from '@reduxjs/toolkit';
 import _ from 'lodash';
 import {normalize} from 'normalizr';
 import {END, eventChannel, EventChannel, SagaIterator} from 'redux-saga';
 import {call, fork, put, race, select, take, takeMaybe} from 'redux-saga/effects';
 import actions from '../actions';
-import {scan} from '../apis/metaman';
+import {fromMeta, scan} from '../apis/metaman';
 import * as schemas from '../common/schemas';
 import {Settings} from '../models/prefs';
 import {Normalized} from '../models/store';
@@ -11,22 +12,23 @@ import {Wrapper} from '../models/wrapper';
 import selectors from '../selectors';
 
 export default function* (): SagaIterator {
-  yield fork(watch);
+  yield fork(watchScan);
+  yield fork(watchPreview);
 }
 
-function* watch(): SagaIterator {
+function* watchScan(): SagaIterator {
   while (true) {
     yield take(actions.metaman.scan.request);
     yield race([
-      call(handle),
+      call(handleScan),
       take(actions.metaman.scan.cancel)
     ]);
   }
 }
 
-function* handle(): SagaIterator {
-  let {directories}: Settings = yield select(selectors.prefs.settings);
-  let chan: EventChannel<Wrapper> = yield call(channel, directories);
+function* handleScan(): SagaIterator {
+  let {dirs}: Settings = yield select(selectors.prefs.settings);
+  let chan: EventChannel<Wrapper> = yield call(scanChannel, dirs);
   try {
     while (true) {
       let wrapper: Wrapper = yield takeMaybe(chan);
@@ -43,7 +45,7 @@ function* handle(): SagaIterator {
   }
 }
 
-function channel(dirs: string[]): EventChannel<Wrapper> {
+function scanChannel(dirs: string[]): EventChannel<Wrapper> {
   return eventChannel(emit => {
     let closed = false;
     (async () => {
@@ -61,4 +63,24 @@ function channel(dirs: string[]): EventChannel<Wrapper> {
     })();
     return () => closed = true;
   });
+}
+
+function* watchPreview(): SagaIterator {
+  while (true) {
+    let action: PayloadAction<string> = yield take(actions.metaman.preview.request);
+    yield race([
+      call(handlePreview, action.payload),
+      take(actions.metaman.preview.cancel)
+    ]);
+  }
+}
+
+function* handlePreview(payload: string): SagaIterator {
+  try {
+    let wrapper: Wrapper = yield call(fromMeta, payload);
+    let normalized: Normalized<string> = yield call(normalize, wrapper, schemas.wrapper);
+    yield put(actions.metaman.preview.success(normalized));
+  } catch (err) {
+    yield put(actions.metaman.preview.failure(err));
+  }
 }

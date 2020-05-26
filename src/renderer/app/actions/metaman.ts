@@ -13,5 +13,14 @@ export default {
       (err: Error) => failure(err)
     )
   },
+  preview: {
+    request: createAction<string>('metaman/preview/request'),
+    cancel: createAction('metaman/preview/cancel'),
+    success: createAction<Normalized<string>>('metaman/preview/success'),
+    failure: createAction(
+      'metaman/preview/failure',
+      (err: Error) => failure(err)
+    )
+  },
   select: createAction<string>('metaman/select')
 };

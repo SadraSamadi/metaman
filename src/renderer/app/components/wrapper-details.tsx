@@ -1,6 +1,7 @@
 import {Button, Empty, Space, Tooltip} from 'antd';
 import classNames from 'classnames';
-import React, {ReactElement} from 'react';
+import {parse} from 'path';
+import React, {ReactElement, useMemo} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import actions from '../actions';
 import {AppDispatch} from '../models/store';
@@ -13,6 +14,12 @@ export default function WrapperDetails(props: WrapperDetailsProps): ReactElement
   const dispatch = useDispatch<AppDispatch>();
   const {path, movie, meta} = useSelector(selectors.wrappers.wrapper(props.id));
   const metadata = useSelector(selectors.wrappers.meta(meta.data as string));
+  const name = useMemo(getName, [path]);
+
+  function getName(): string {
+    let {name} = parse(path);
+    return name;
+  }
 
   function onScrape(): void {
     dispatch(actions.wrappers.scrape.request(props.id));
@@ -33,15 +40,15 @@ export default function WrapperDetails(props: WrapperDetailsProps): ReactElement
     <div className={classNames('h-full flex flex-col', props.className)}>
       <div className='flex-none p-4 flex items-center'>
         <Tooltip placement='bottom' title={path} className='flex-1 mr-2'>
-          <h4 className='m-0 truncate'>{path}</h4>
+          <h4 className='m-0 truncate'>{name}</h4>
         </Tooltip>
         <Space>
           <Button type='primary' onClick={onScrape}>Scrape</Button>
           <Button type='primary'
                   onClick={onMeta}
                   loading={meta.status === 'request'}
-                  disabled={movie.status !== 'success'}>
-            Meta
+                  disabled={meta.status === 'success' || movie.status !== 'success'}>
+            Manage
           </Button>
           <Button type='primary'
                   onClick={onMovie}

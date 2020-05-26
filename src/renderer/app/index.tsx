@@ -1,9 +1,11 @@
-import React, {ReactElement} from 'react';
-import {Provider} from 'react-redux';
+import React, {ReactElement, useEffect} from 'react';
+import {Provider, useDispatch} from 'react-redux';
 import {HashRouter, Redirect, Route, Switch} from 'react-router-dom';
+import actions from './actions';
 import store from './common/store';
 import Home from './components/home';
 import MoviePreview from './components/movie-preview';
+import {AppDispatch} from './models/store';
 
 export default function App(): ReactElement {
 
@@ -16,6 +18,12 @@ export default function App(): ReactElement {
 }
 
 function Container(): ReactElement {
+
+  const dispatch = useDispatch<AppDispatch>();
+
+  useEffect(() => {
+    dispatch(actions.prefs.init());
+  }, []);
 
   return (
     <HashRouter>

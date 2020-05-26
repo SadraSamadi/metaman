@@ -1,7 +1,7 @@
 {
   "name": "metaman",
   "version": "1.0.0",
-  "description": "Movie meta-data management.",
+  "description": "Movie metadata management.",
   "homepage": "https://sadrasamadi.github.io/metaman/",
   "repository": "https://github.com/SadraSamadi/metaman/",
   "license": "MIT",

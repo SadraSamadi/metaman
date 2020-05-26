@@ -4,7 +4,7 @@ import {SagaIterator} from 'redux-saga';
 import {call, Effect, put, select, takeLatest} from 'redux-saga/effects';
 import actions from '../actions';
 import {init, reset, save} from '../apis/prefs';
-import {setOptions} from '../apis/tmdb';
+import {setTmdb} from '../apis/tmdb';
 import {Proxy, Settings} from '../models/prefs';
 import selectors from '../selectors';
 
@@ -41,7 +41,7 @@ function* handle(effect: Effect): SagaIterator {
 
 function* handleSuccess(): SagaIterator {
   let {tmdb, proxy}: Settings = yield select(selectors.prefs.settings);
-  yield call(setOptions, tmdb);
+  yield call(setTmdb, tmdb);
   yield call(setProxy, proxy);
 }
 

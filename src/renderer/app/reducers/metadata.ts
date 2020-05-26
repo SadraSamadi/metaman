@@ -1,7 +1,7 @@
 import {createReducer} from '@reduxjs/toolkit';
 import _ from 'lodash';
 import actions from '../actions';
-import {Meta} from '../models/meta';
+import {Managed} from '../models/managed';
 import {Metadata} from '../models/metadata';
 import {Entity, EntityAction, NormalizedAction} from '../models/store';
 
@@ -12,7 +12,10 @@ export default createReducer(initialState, {
   [actions.metaman.scan.add.type]: (state, action: NormalizedAction<string>) => {
     _.assign(state, action.payload.entities.metadata);
   },
-  [actions.wrappers.meta.success.type]: (state, action: EntityAction<Meta>) => {
+  [actions.metaman.preview.success.type]: (state, action: NormalizedAction<string>) => {
+    _.assign(state, action.payload.entities.metadata);
+  },
+  [actions.wrappers.meta.success.type]: (state, action: EntityAction<Managed>) => {
     let {meta} = action.payload.data;
     state[meta.id] = meta;
   }
