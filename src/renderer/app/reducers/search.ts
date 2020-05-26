@@ -12,8 +12,11 @@ export default createReducer(initialState, {
   [actions.metaman.scan.request.type]: () => initialState,
   [actions.search.request.type]: (state, action: EntityAction<number>) => {
     state.wrapper = action.payload.id;
-    state.page.status = 'request';
-    state.page.error = null;
+    state.page = {
+      status: 'request',
+      data: null,
+      error: null
+    };
   },
   [actions.search.cancel.type]: state => {
     state.page.status = 'cancel';

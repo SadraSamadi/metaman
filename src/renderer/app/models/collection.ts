@@ -1,5 +1,4 @@
 import {Movie} from './movie';
-import {Lazy} from './store';
 
 export interface Collection {
 
@@ -13,6 +12,6 @@ export interface Collection {
 
   backdrop_path: string;
 
-  parts: Lazy<Movie, number>[];
+  parts: Movie[];
 
 }

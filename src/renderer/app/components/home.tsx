@@ -16,18 +16,12 @@ export default function Home(): ReactElement {
 
   return (
     <div className='h-full flex flex-col'>
-      <div className='flex-none'>
-        <Header/>
-      </div>
+      <Header className='flex-none'/>
       <div className='flex-none h-px bg-gray-300'/>
       <div className='flex-1 flex overflow-hidden'>
-        <div className='flex-none w-1/4'>
-          <WrapperList/>
-        </div>
+        <WrapperList className='flex-none w-1/4'/>
         <div className='flex-none w-px bg-gray-300'/>
-        <div className='flex-1 overflow-hidden'>
-          <Main/>
-        </div>
+        <Main className='flex-1 overflow-hidden'/>
       </div>
     </div>
   );

@@ -1,10 +1,12 @@
 dotenv
+download
 electron
 electron-debug
 electron-devtools-installer
 electron-store
 electron-util
 electron-window-state
+filenamify
 fs-extra
 mime
 yargs

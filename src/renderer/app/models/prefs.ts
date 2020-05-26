@@ -1,5 +1,6 @@
+import {Options} from './options';
 import {AsyncState} from './store';
-import {Options as Tmdb} from './tmdb';
+import {Tmdb} from './tmdb';
 
 export interface Preferences {
 
@@ -12,6 +13,8 @@ export interface Preferences {
 export interface Settings {
 
   directories: string[];
+
+  options: Options;
 
   tmdb: Tmdb;
 

@@ -13,10 +13,13 @@ export const DEFAULT_SETTINGS: Settings = {
     language: 'en-US',
     adults: true
   },
+  options: {},
   proxy: {
     enable: false,
     protocol: 'http'
   }
 };
 
-export const META_EXTENSION = '.metaman';
+export const META_VER = 1;
+
+export const META_EXT = '.metaman';

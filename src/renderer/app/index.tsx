@@ -9,16 +9,24 @@ export default function App(): ReactElement {
 
   return (
     <Provider store={store}>
-      <HashRouter>
-        <div className='w-screen h-screen overflow-hidden'>
-          <Switch>
-            <Redirect exact from='/' to='/home'/>
-            <Route path='/home' component={Home}/>
-            <Route path='/movie' component={MoviePreview}/>
-          </Switch>
-        </div>
-      </HashRouter>
+      <Container/>
     </Provider>
+  );
+
+}
+
+function Container(): ReactElement {
+
+  return (
+    <HashRouter>
+      <div className='w-screen h-screen'>
+        <Switch>
+          <Redirect exact from='/' to='/home'/>
+          <Route path='/home' component={Home}/>
+          <Route path='/movie' component={MoviePreview}/>
+        </Switch>
+      </div>
+    </HashRouter>
   );
 
 }

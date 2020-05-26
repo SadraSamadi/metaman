@@ -2,7 +2,7 @@ import {createReducer, PayloadAction} from '@reduxjs/toolkit';
 import _ from 'lodash';
 import actions from '../actions';
 import {Guess} from '../models/guessit';
-import {Metadata} from '../models/metadata';
+import {Meta} from '../models/meta';
 import {Entity, EntityAction, FailureAction, Normalized, NormalizedAction} from '../models/store';
 import {Info, Wrapper} from '../models/wrapper';
 
@@ -91,11 +91,12 @@ export default createReducer(initialState, {
     let {meta} = state[action.payload];
     meta.status = 'cancel';
   },
-  [actions.wrappers.meta.success.type]: (state, action: EntityAction<Metadata>) => {
+  [actions.wrappers.meta.success.type]: (state, action: EntityAction<Meta>) => {
     let {id, data} = action.payload;
-    let {meta} = state[id];
-    meta.status = 'success';
-    meta.data = data.id;
+    let wrapper = state[id];
+    wrapper.path = data.path;
+    wrapper.meta.status = 'success';
+    wrapper.meta.data = data.meta.id;
   },
   [actions.wrappers.meta.failure.type]: (state, action: FailureAction<string>) => {
     let {movie} = state[action.payload];

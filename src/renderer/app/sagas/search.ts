@@ -1,6 +1,6 @@
 import {PayloadAction} from '@reduxjs/toolkit';
 import {SagaIterator} from 'redux-saga';
-import {call, fork, put, race, select, take} from 'redux-saga/effects';
+import {call, delay, fork, put, race, select, take} from 'redux-saga/effects';
 import actions from '../actions';
 import {searchMovie} from '../apis/tmdb';
 import {Page} from '../models/page';
@@ -25,8 +25,8 @@ function* watch(): SagaIterator {
 function* handle(payload: EntityPayload<number>): SagaIterator {
   try {
     let {info}: Wrapper = yield select(selectors.wrappers.wrapper(payload.id));
-    let {title, year} = info;
-    let page: Page = yield call(searchMovie, title, year, payload.data);
+    yield delay(2000);
+    let page: Page = yield call(searchMovie, info.title, info.year, payload.data);
     yield put(actions.search.success(page));
   } catch (err) {
     yield put(actions.search.failure(err));

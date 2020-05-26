@@ -1,32 +1,34 @@
-import {Form, Input, InputNumber, Modal} from 'antd';
+import {Button, Card, Empty, Form, Input, InputNumber, Modal, Spin} from 'antd';
 import _ from 'lodash';
+import {parse} from 'path';
 import React, {ReactElement, useEffect, useMemo} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import actions from '../actions';
 import {AppDispatch} from '../models/store';
 import {Info} from '../models/wrapper';
 import selectors from '../selectors';
+import {ImageContainer} from './image';
 
 export default function Scrape(props: ScrapeProps): ReactElement {
 
   const dispatch = useDispatch<AppDispatch>();
-  const {scrape} = useSelector(selectors.wrappers.wrapper(props.wrapper));
+  const {path, scrape} = useSelector(selectors.wrappers.wrapper(props.wrapper));
+  const {base} = useMemo(() => parse(path), [path]);
 
   function onCancel(): void {
     dispatch(actions.wrappers.scrape.cancel(props.wrapper));
   }
 
-  function onSuccess(): void {
-    dispatch(actions.wrappers.scrape.success(props.wrapper));
-  }
-
   return (
-    <Modal width={700}
+    <Modal centered
+           width={700}
            destroyOnClose
-           onOk={onSuccess}
            onCancel={onCancel}
-           title='Scrapping...'
-           visible={scrape.status === 'request'}>
+           className='my-4 p-0'
+           bodyStyle={{padding: 0}}
+           visible={scrape.status === 'request'}
+           footer={<Button onClick={onCancel}>Cancel</Button>}
+           title={<h4 className='m-0 mr-8 truncate'>{base}</h4>}>
       <Content wrapper={props.wrapper}/>
     </Modal>
   );
@@ -36,38 +38,94 @@ export default function Scrape(props: ScrapeProps): ReactElement {
 function Content(props: ContentProps): ReactElement {
 
   const dispatch = useDispatch<AppDispatch>();
-  const {info} = useSelector(selectors.wrappers.wrapper(props.wrapper));
+  const {info, guess, movie} = useSelector(selectors.wrappers.wrapper(props.wrapper));
+  const page = useSelector(selectors.search.page(props.wrapper));
   const onInfoDebounced = useMemo(() => _.debounce(onInfo, 300), [props.wrapper]);
   const [form] = Form.useForm();
 
   useEffect(() => {
     if (info)
       form.setFieldsValue(info);
-    else
-      form.resetFields();
   }, [info]);
 
   function onInfo(data: Info): void {
-    dispatch(actions.wrappers.info({id: props.wrapper, data}));
+    dispatch(actions.wrappers.info({
+      id: props.wrapper,
+      data
+    }));
+  }
+
+  function onGuess(): void {
+    dispatch(actions.wrappers.guess.request(props.wrapper));
+  }
+
+  function onSearch(): void {
+    dispatch(actions.search.request({
+      id: props.wrapper,
+      data: undefined
+    }));
+  }
+
+  function onMovie(data: number): void {
+    dispatch(actions.wrappers.movie.request({
+      id: props.wrapper,
+      data
+    }));
   }
 
   return (
-    <div>
-      <Form form={form} onValuesChange={onInfoDebounced}>
-        <div className='w-full flex'>
-          <div className='flex-1 mr-4'>
-            <Form.Item name='title' className='m-0'>
-              <Input placeholder='Title'/>
-            </Form.Item>
-          </div>
-          <div className='flex-none'>
+    <>
+      <div className='p-4 flex'>
+        <Button type='primary'
+                className='mr-4'
+                onClick={onGuess}
+                loading={guess.status === 'request'}>
+          Guess
+        </Button>
+        <Form form={form} className='flex-1 mr-4' onValuesChange={onInfoDebounced}>
+          <div className='flex'>
+            <div className='flex-1 mr-4'>
+              <Form.Item name='title' className='m-0'>
+                <Input placeholder='Title'/>
+              </Form.Item>
+            </div>
             <Form.Item name='year' className='m-0'>
               <InputNumber placeholder='Year'/>
             </Form.Item>
           </div>
+        </Form>
+        <Button type='primary'
+                onClick={onSearch}
+                disabled={!info?.title}
+                loading={page?.status === 'request'}>
+          Search
+        </Button>
+      </div>
+      <div className='h-px bg-gray-300'/>
+      <Spin spinning={movie.status === 'request'}>
+        <div style={{height: 500}}>
+          {page?.data?.total_results ? (
+            <div className='h-full p-4 overflow-y-auto'>
+              <div className='grid grid-cols-4 gap-4'>
+                {page.data.results.map(result => (
+                  <Card hoverable
+                        size='small'
+                        key={result.id}
+                        onClick={() => onMovie(result.id)}
+                        cover={<ImageContainer path={result.poster_path} size='w342' className='h-56'/>}>
+                    <Card.Meta title={result.release_date} description={result.title}/>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className='h-full flex items-center justify-center'>
+              <Empty/>
+            </div>
+          )}
         </div>
-      </Form>
-    </div>
+      </Spin>
+    </>
   );
 
 }

@@ -69,7 +69,3 @@ export const wrapper = new schema.Entity<Wrapper>('wrappers', {
 company.define({
   parent_company: company
 });
-
-collection.define({
-  parts: [movie]
-});

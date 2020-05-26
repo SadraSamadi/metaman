@@ -6,22 +6,24 @@ import {ImageSize} from '../models/image';
 export function Image(props: ImageProps): ReactElement {
 
   return (
-    <img style={props.style}
+    <img alt={props.alt}
+         style={props.style}
          className={props.className}
-         src={imageUrl(props.path, props.size)}
-         alt={props.alt}/>
+         src={imageUrl(props.path, props.size)}/>
   );
 
 }
 
 export function ImageContainer(props: PropsWithChildren<ImageContainerProps>): ReactElement {
 
+  const tint = props.tint || 0;
+
   const backgroundImage = `
     linear-gradient(
-      rgba(0, 0, 0, ${props.tint || 0}),
-      rgba(0, 0, 0, ${props.tint || 0})
+      rgba(0, 0, 0, ${tint}),
+      rgba(0, 0, 0, ${tint})
     ),
-    url("${imageUrl(props.path, props.size)}")
+    url('${imageUrl(props.path, props.size)}')
   `;
 
   return (

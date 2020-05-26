@@ -11,22 +11,22 @@ import {Wrapper} from '../models/wrapper';
 import selectors from '../selectors';
 
 export default function* (): SagaIterator {
-  yield fork(watchScan);
+  yield fork(watch);
 }
 
-function* watchScan(): SagaIterator {
+function* watch(): SagaIterator {
   while (true) {
     yield take(actions.metaman.scan.request);
     yield race([
-      call(handleScan),
+      call(handle),
       take(actions.metaman.scan.cancel)
     ]);
   }
 }
 
-function* handleScan(): SagaIterator {
+function* handle(): SagaIterator {
   let {directories}: Settings = yield select(selectors.prefs.settings);
-  let chan: EventChannel<Wrapper> = yield call(scanChannel, directories);
+  let chan: EventChannel<Wrapper> = yield call(channel, directories);
   try {
     while (true) {
       let wrapper: Wrapper = yield takeMaybe(chan);
@@ -43,7 +43,7 @@ function* handleScan(): SagaIterator {
   }
 }
 
-function scanChannel(dirs: string[]): EventChannel<Wrapper> {
+function channel(dirs: string[]): EventChannel<Wrapper> {
   return eventChannel(emit => {
     let closed = false;
     (async () => {

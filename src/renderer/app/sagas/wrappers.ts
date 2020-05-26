@@ -1,13 +1,15 @@
 import {PayloadAction} from '@reduxjs/toolkit';
 import {denormalize, normalize} from 'normalizr';
 import {SagaIterator} from 'redux-saga';
-import {call, delay, put, race, select, take, takeEvery} from 'redux-saga/effects';
+import {call, cancelled, put, race, select, take, takeEvery} from 'redux-saga/effects';
 import actions from '../actions';
-import {guess, submit} from '../apis/metaman';
+import {guess, meta} from '../apis/metaman';
 import {getMovie} from '../apis/tmdb';
 import * as schemas from '../common/schemas';
 import {Movie} from '../models/movie';
-import {AppState, EntityAction, EntityPayload, Normalized} from '../models/store';
+import {Page} from '../models/page';
+import {Settings} from '../models/prefs';
+import {AppState, AsyncState, EntityAction, EntityPayload, Normalized} from '../models/store';
 import {Wrapper} from '../models/wrapper';
 import selectors from '../selectors';
 
@@ -82,12 +84,21 @@ function* requestScrape(action: PayloadAction<string>): SagaIterator {
 
 function* handleScrape(payload: string): SagaIterator {
   try {
-    let wrapper: Wrapper = yield select(selectors.wrappers.wrapper(payload));
-    console.log(wrapper);
-    yield delay(10000);
+    yield take(actions.wrappers.movie.success);
     yield put(actions.wrappers.scrape.success(payload));
   } catch (err) {
     yield put(actions.wrappers.scrape.failure(payload, err));
+  } finally {
+    if (yield cancelled()) {
+      let wrapper: Wrapper = yield select(selectors.wrappers.wrapper(payload));
+      let page: AsyncState<Page> = yield select(selectors.search.page(payload));
+      if (wrapper.guess.status === 'request')
+        yield put(actions.wrappers.guess.cancel(payload));
+      if (wrapper.movie.status === 'request')
+        yield put(actions.wrappers.movie.cancel(payload));
+      if (page.status === 'request')
+        yield put(actions.search.cancel());
+    }
   }
 }
 
@@ -109,12 +120,14 @@ function* requestMeta(action: PayloadAction<string>): SagaIterator {
 function* handleMeta(payload: string): SagaIterator {
   try {
     let state: AppState = yield select();
+    let settings: Settings = yield select(selectors.prefs.settings);
     let wrapper: Wrapper = yield call(denormalize, payload, schemas.wrapper, state);
     yield put(actions.wrappers.meta.success({
       id: payload,
-      data: yield call(submit, wrapper)
+      data: yield call(meta, wrapper, settings.options)
     }));
   } catch (err) {
+    console.error(err);
     yield put(actions.wrappers.meta.failure(payload, err));
   }
 }

@@ -14,8 +14,8 @@ export default function MovieDetails(props: MovieDetailsProps): ReactElement {
   return (
     <>
       <ImageContainer path={movie.backdrop_path} size='w780' className='p-4 flex' tint={0.25}>
-        <Image path={movie.poster_path} size='w342' className='rounded shadow'/>
-        <div className='ml-4 text-white'>
+        <Image path={movie.poster_path} size='w342' className='flex-none rounded shadow'/>
+        <div className='flex-1 ml-4 text-white'>
           <h1 className='text-white'>{movie.title}</h1>
           <h3 className='text-white'>{movie.release_date}</h3>
           <p className='text-justify'>{movie.overview}</p>
@@ -69,7 +69,9 @@ function CastCard(props: CastCardProps): ReactElement {
   const cast = useSelector(selectors.wrappers.cast(props.id));
 
   return (
-    <Card size='small' cover={<ImageContainer path={cast.profile_path} size='w185' className='h-48'/>}>
+    <Card hoverable
+          size='small'
+          cover={<ImageContainer path={cast.profile_path} size='w185' className='h-48'/>}>
       <Card.Meta description={cast.character}
                  title={
                    <Tooltip placement='bottom' title={cast.name}>
@@ -86,7 +88,9 @@ function CrewCard(props: CrewCardProps): ReactElement {
   const crew = useSelector(selectors.wrappers.crew(props.id));
 
   return (
-    <Card size='small' cover={<ImageContainer path={crew.profile_path} size='w185' className='h-48'/>}>
+    <Card hoverable
+          size='small'
+          cover={<ImageContainer path={crew.profile_path} size='w185' className='h-48'/>}>
       <Card.Meta description={`${crew.department} / ${crew.job}`}
                  title={
                    <Tooltip placement='bottom' title={crew.name}>
@@ -95,16 +99,6 @@ function CrewCard(props: CrewCardProps): ReactElement {
                  }/>
     </Card>
   );
-
-}
-
-interface LimitedProps<T> {
-
-  title: string;
-
-  list: T[];
-
-  render: (item: T) => ReactNode;
 
 }
 
@@ -117,6 +111,16 @@ interface MovieDetailsProps {
 export interface GenreTagProps {
 
   id: number;
+
+}
+
+interface LimitedProps<T> {
+
+  title: string;
+
+  list: T[];
+
+  render: (item: T) => ReactNode;
 
 }
 

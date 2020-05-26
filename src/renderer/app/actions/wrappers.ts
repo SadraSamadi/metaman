@@ -1,7 +1,7 @@
 import {createAction} from '@reduxjs/toolkit';
 import {failure} from '../common/util';
 import {Guess} from '../models/guessit';
-import {Metadata} from '../models/metadata';
+import {Meta} from '../models/meta';
 import {EntityPayload, Normalized} from '../models/store';
 import {Info} from '../models/wrapper';
 
@@ -37,7 +37,7 @@ export default {
   meta: {
     request: createAction<string>('wrappers/meta/request'),
     cancel: createAction<string>('wrappers/meta/cancel'),
-    success: createAction<EntityPayload<Metadata>>('wrappers/meta/success'),
+    success: createAction<EntityPayload<Meta>>('wrappers/meta/success'),
     failure: createAction(
       'wrappers/meta/failure',
       (payload: string, err: Error) => failure(err, payload)

@@ -4,6 +4,8 @@ export interface Metadata {
 
   tmdb: number;
 
+  version: number;
+
   update: number;
 
   original: string;

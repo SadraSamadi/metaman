@@ -23,10 +23,9 @@ export default function WrapperItem(props: WrapperItemProps): ReactElement {
   const wrapper = useSelector(selectors.wrappers.wrapper(props.id));
   const movie = useSelector(selectors.wrappers.movie(wrapper.movie.data as number));
   const meta = useSelector(selectors.wrappers.meta(wrapper.meta.data as string));
-  const search = useSelector(selectors.search.search);
+  const page = useSelector(selectors.search.page(props.id));
   const name = useMemo(getName, [wrapper.info, movie]);
   const update = useMemo(getUpdate, [meta]);
-  const page = search.wrapper === wrapper.id && search.page;
   const request = _.includes([
     wrapper.guess.status,
     wrapper.movie.status,
@@ -39,7 +38,7 @@ export default function WrapperItem(props: WrapperItemProps): ReactElement {
       let mom = moment(movie.release_date);
       let year = mom.year();
       return `${movie.title} (${year})`;
-    } else if (wrapper.info) {
+    } else if (wrapper.info?.title) {
       let {title, year} = wrapper.info;
       return `${title} (${year})`;
     } else {
@@ -62,31 +61,29 @@ export default function WrapperItem(props: WrapperItemProps): ReactElement {
   return (
     <div onClick={onSelect}
          className={classNames(
-           'cursor-pointer',
-           'transition-colors duration-75 ease-out',
+           'p-2 cursor-pointer',
+           'transition-colors duration-100 ease-out',
            wrapper.id === selected ? 'bg-gray-200' : 'hover:bg-gray-100'
          )}>
-      <div className='p-2'>
-        <h5 className='m-0 truncate'>{name}</h5>
-        <div className='flex items-center justify-between'>
-          <div className='mr-2 text-xs text-gray-500'>
-            <span className='font-bold'>last update: </span>
-            <span>{update}</span>
-          </div>
-          {(() => {
-            if (request)
-              return <LoadingOutlined className='text-purple-500'/>;
-            else if (wrapper.meta.data)
-              return <CheckOutlined className='text-green-500'/>;
-            else if (wrapper.movie.data)
-              return <IssuesCloseOutlined className='text-blue-500'/>;
-            else if (page?.data?.results?.length)
-              return <ClockCircleOutlined className='text-yellow-500'/>;
-            else if (wrapper.info)
-              return <ExclamationCircleOutlined className='text-orange-500'/>;
-            return <WarningOutlined className='text-red-500'/>;
-          })()}
+      <h5 className='m-0 truncate'>{name}</h5>
+      <div className='flex items-center justify-between'>
+        <div className='mr-2 text-xs text-gray-500'>
+          <span className='font-bold'>last update: </span>
+          <span>{update}</span>
         </div>
+        {(() => {
+          if (request)
+            return <LoadingOutlined className='text-purple-500'/>;
+          else if (wrapper.meta.data)
+            return <CheckOutlined className='text-green-500'/>;
+          else if (wrapper.movie.data)
+            return <IssuesCloseOutlined className='text-blue-500'/>;
+          else if (page?.data?.total_results)
+            return <ClockCircleOutlined className='text-yellow-500'/>;
+          else if (wrapper.info)
+            return <ExclamationCircleOutlined className='text-orange-500'/>;
+          return <WarningOutlined className='text-red-500'/>;
+        })()}
       </div>
     </div>
   );

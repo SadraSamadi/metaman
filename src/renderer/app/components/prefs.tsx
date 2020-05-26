@@ -1,10 +1,10 @@
 import {DeleteOutlined} from '@ant-design/icons/lib';
-import {Alert, Button, Form, Input, InputNumber, Modal, Select, Switch, Tabs, Tooltip} from 'antd';
+import {Alert, Button, Empty, Form, Input, InputNumber, Modal, Select, Switch, Tabs, Tooltip} from 'antd';
 import {FormInstance} from 'antd/lib/form';
 import classNames from 'classnames';
 import {remote} from 'electron';
 import _ from 'lodash';
-import React, {forwardRef, ReactElement, useEffect, useRef} from 'react';
+import React, {forwardRef, ReactElement, useRef} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import actions from '../actions';
 import {Settings, Status} from '../models/prefs';
@@ -24,8 +24,7 @@ export default function Prefs(): ReactElement {
   }
 
   function onCancel(): void {
-    if (!request)
-      dispatch(actions.prefs.close());
+    dispatch(actions.prefs.close());
   }
 
   function onReset(): void {
@@ -35,19 +34,20 @@ export default function Prefs(): ReactElement {
   return (
     <Modal centered
            width={700}
+           destroyOnClose
            visible={modal}
            title='Preferences'
-           className='my-4 p-0'
-           maskClosable={!request}
            closable={!request}
            onCancel={onCancel}
-           destroyOnClose
+           className='my-4 p-0'
+           maskClosable={!request}
+           bodyStyle={{padding: 0}}
            footer={
              <div className='flex items-center'>
                <Button type='link'
-                       disabled={settings.status === 'save'}
+                       onClick={onReset}
                        loading={settings.status === 'reset'}
-                       onClick={onReset}>
+                       disabled={settings.status === 'save'}>
                  Reset Defaults
                </Button>
                <div className='flex-1 mx-2 text-left'>
@@ -57,9 +57,9 @@ export default function Prefs(): ReactElement {
                </div>
                <Button disabled={request} onClick={onCancel}>Cancel</Button>
                <Button type='primary'
-                       disabled={settings.status === 'reset'}
+                       onClick={onSave}
                        loading={settings.status === 'save'}
-                       onClick={onSave}>
+                       disabled={settings.status === 'reset'}>
                  Save
                </Button>
              </div>
@@ -73,10 +73,6 @@ export default function Prefs(): ReactElement {
 const PrefsForm = forwardRef<FormInstance, PrefsFormProps>((props, ref) => {
 
   const [form] = Form.useForm();
-
-  useEffect(() => {
-    form.setFieldsValue(props.settings);
-  }, [props.settings]);
 
   async function onAddDir(operation: Operation<string>): Promise<void> {
     let win = remote.getCurrentWindow();
@@ -92,42 +88,53 @@ const PrefsForm = forwardRef<FormInstance, PrefsFormProps>((props, ref) => {
   }
 
   return (
-    <Form ref={ref} form={form} labelCol={{span: 6}} wrapperCol={{span: 18}}>
+    <Form ref={ref}
+          form={form}
+          labelCol={{span: 6}}
+          wrapperCol={{span: 18}}
+          initialValues={props.settings}>
       <Tabs size='small' tabPosition='left'>
         <Tabs.TabPane key='directories' tab='Directories'>
           <Form.List name='directories'>
             {(fields, operation) => (
-              <div style={{height: 400}} className='p-1 flex flex-col'>
-                <div className='flex-1 mb-4 overflow-y-auto'>
-                  {fields.map(field => {
-                    let dir = form.getFieldValue(['directories', field.name]);
-                    return (
-                      <div key={field.key}
-                           className={classNames(
-                             'px-4 py-2 flex items-center',
-                             'transition-colors duration-75 ease-out hover:bg-gray-100'
-                           )}>
-                        <Tooltip placement='bottom' className='flex-1 mr-4' title={dir}>
-                          <span className='truncate'>{dir}</span>
-                        </Tooltip>
-                        <Button danger
-                                type='link'
-                                className='flex-none'
-                                icon={<DeleteOutlined/>}
-                                onClick={() => operation.remove(field.name)}/>
-                      </div>
-                    );
-                  })}
+              <div style={{height: 400}} className='flex flex-col'>
+                <div className='flex-1 p-4 overflow-y-auto'>
+                  {fields.length ? (
+                    fields.map(field => {
+                      let dir = form.getFieldValue(['directories', field.name]);
+                      return (
+                        <div key={field.key}
+                             className={classNames(
+                               'px-4 py-2 flex items-center',
+                               'transition-colors duration-100 ease-out hover:bg-gray-100'
+                             )}>
+                          <Tooltip placement='bottom' className='flex-1 mr-4' title={dir}>
+                            <span className='truncate'>{dir}</span>
+                          </Tooltip>
+                          <Button danger
+                                  type='link'
+                                  icon={<DeleteOutlined/>}
+                                  onClick={() => operation.remove(field.name)}/>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <div className='h-full flex items-center justify-center'>
+                      <Empty/>
+                    </div>
+                  )}
                 </div>
-                <Button type='dashed' className='flex-none' onClick={() => onAddDir(operation)}>
-                  Add New Directory
-                </Button>
+                <div className='p-4'>
+                  <Button type='dashed' onClick={() => onAddDir(operation)} block>
+                    Add New Directory
+                  </Button>
+                </div>
               </div>
             )}
           </Form.List>
         </Tabs.TabPane>
         <Tabs.TabPane key='tmdb' tab='The Movie DB'>
-          <div style={{height: 400}} className='p-1 overflow-y-auto'>
+          <div style={{height: 400}} className='p-4'>
             <Form.Item name={['tmdb', 'key']} label='API Key' rules={[{required: true}]}>
               <Input/>
             </Form.Item>
@@ -143,7 +150,7 @@ const PrefsForm = forwardRef<FormInstance, PrefsFormProps>((props, ref) => {
           </div>
         </Tabs.TabPane>
         <Tabs.TabPane key='proxy' tab='Proxy'>
-          <div style={{height: 400}} className='p-1 overflow-y-auto'>
+          <div style={{height: 400}} className='p-4'>
             <Form.Item valuePropName='checked' name={['proxy', 'enable']} label='Enable'>
               <Switch/>
             </Form.Item>
