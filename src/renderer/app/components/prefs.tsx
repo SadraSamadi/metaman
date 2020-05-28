@@ -219,7 +219,8 @@ const PrefsForm = forwardRef<FormInstance, PrefsFormProps>((props, ref) => {
         </Tabs.TabPane>
         <Tabs.TabPane key='about' tab='About'>
           <div style={{height}} className='px-4 pb-4 flex flex-col items-center justify-center'>
-            <h2>Metaman</h2>
+            <h2 className='m-0'>Metaman</h2>
+            <h2>(Metadata Manager)</h2>
             <h4>
               <span className='font-bold'>Version: </span>
               <span>1.0.0</span>
