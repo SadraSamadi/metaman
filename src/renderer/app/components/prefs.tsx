@@ -231,15 +231,11 @@ const PrefsForm = forwardRef<FormInstance, PrefsFormProps>((props, ref) => {
             </h4>
             <h4>
               <span className='font-bold'>E-Mail: </span>
-              <a onClick={() => shell.openExternal('mailto:sadra.smd@gmail.com')}>
-                sadra.smd@gmail.com
-              </a>
+              <a onClick={() => shell.openExternal('mailto:sadra.smd@gmail.com')}>sadra.smd@gmail.com</a>
             </h4>
             <h4>
               <span className='font-bold'>Powered By: </span>
-              <a onClick={() => shell.openExternal('https://themoviedb.org/')}>
-                The Movie DB
-              </a>
+              <a onClick={() => shell.openExternal('https://themoviedb.org/')}>The Movie DB</a>
             </h4>
             <h5>Copyright &copy; 2020</h5>
           </div>

@@ -1,8 +1,9 @@
 import {grey} from '@ant-design/colors';
-import {Card, Divider, Tag, Tooltip} from 'antd';
-import React, {ReactElement, ReactNode} from 'react';
+import {DownOutlined} from '@ant-design/icons';
+import {Button, Card, Divider, Tag, Tooltip} from 'antd';
+import _ from 'lodash';
+import React, {ReactElement, ReactNode, useEffect, useMemo, useState} from 'react';
 import {useSelector} from 'react-redux';
-import {Movie} from '../models/movie';
 import selectors from '../selectors';
 import {Image, ImageContainer} from './image';
 
@@ -14,7 +15,7 @@ export default function MovieDetails(props: MovieDetailsProps): ReactElement {
 
   return (
     <>
-      <ImageContainer path={movie.backdrop_path} size='w780' className='p-4 flex' tint={0.25}>
+      <ImageContainer path={movie.backdrop_path} size='w780' className='px-4 py-8 flex' tint={0.25}>
         <Image path={movie.poster_path} size='w342' className='flex-none rounded shadow'/>
         <div className='flex-1 ml-4 text-white'>
           <h1 className='text-white'>{movie.title}</h1>
@@ -29,7 +30,14 @@ export default function MovieDetails(props: MovieDetailsProps): ReactElement {
         {collection && (
           <Limited title='Collection'
                    list={collection.parts}
-                   render={part => <PartCard key={part.id} part={part}/>}/>
+                   render={part => (
+                     <Card hoverable
+                           size='small'
+                           key={part.id}
+                           cover={<ImageContainer path={part.poster_path} size='w185' className='h-48'/>}>
+                       <Card.Meta title={part.release_date} description={part.title}/>
+                     </Card>
+                   )}/>
         )}
         <Limited title='Cast'
                  list={credit.cast}
@@ -55,31 +63,42 @@ function GenreTag(props: GenreTagProps): ReactElement {
 
 }
 
+const size = 6;
+
 function Limited<T>(props: LimitedProps<T>): ReactElement {
 
-  // TODO: Add 'More' button
+  // TODO: DANGEROUS ZONE
+
+  const [limit, setLimit] = useState(0);
+  const list = useMemo(getList, [props.list, limit]);
+
+  useEffect(() => {
+    let len = props.list.length;
+    setLimit(len < size ? len : size);
+  }, [props.list]);
+
+  function getList(): T[] {
+    return _.take(props.list, limit);
+  }
+
+  function onMore(): void {
+    let rest = props.list.length - limit;
+    let more = rest < size ? rest : size;
+    setLimit(limit + more);
+  }
 
   return (
     <>
       <Divider orientation='left'>{props.title}</Divider>
       <div className='grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-4'>
-        {props.list.map(props.render)}
+        {list.map(props.render)}
       </div>
+      {limit < props.list.length && (
+        <div className='mt-4 text-center'>
+          <Button type='link' onClick={onMore} icon={<DownOutlined/>}>More</Button>
+        </div>
+      )}
     </>
-  );
-
-}
-
-function PartCard(props: PartCardProps): ReactElement {
-
-  const {poster_path, release_date, title} = props.part;
-
-  return (
-    <Card hoverable
-          size='small'
-          cover={<ImageContainer path={poster_path} size='w185' className='h-48'/>}>
-      <Card.Meta title={release_date} description={title}/>
-    </Card>
   );
 
 }
@@ -141,12 +160,6 @@ interface LimitedProps<T> {
   list: T[];
 
   render: (item: T) => ReactNode;
-
-}
-
-export interface PartCardProps {
-
-  part: Movie;
 
 }
 
